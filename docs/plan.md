@@ -1,6 +1,6 @@
 # Plan de trabajo
 
-La referencia principal es `caso1_cauce/caso1_cauce.ipynb`. Los pasos 1 al 12 están completos y ejecutados desde el inicio. Las funciones de limpieza y Naive Bayes aprueban las 27 pruebas originales de esos módulos. Los pasos 13 al 20 y las cuatro pruebas de derivación siguen pendientes.
+La referencia principal es `caso1_cauce/caso1_cauce.ipynb`. Los 20 pasos están completos y el notebook se ejecutó desde cero, sin errores. Las siete preguntas tienen sus respuestas y las 31 pruebas originales aprueban. Los umbrales y la recomendación son provisionales porque faltan los criterios oficiales de aceptación.
 
 ## Etapas y pasos del notebook
 
@@ -18,16 +18,16 @@ La referencia principal es `caso1_cauce/caso1_cauce.ipynb`. Los pasos 1 al 12 es
 | 3. Comparación | 10 | **Completo.** GridSearchCV de CountVectorizer + Naive Bayes: 16 combinaciones, cinco particiones estratificadas y F1 macro. |
 | 3. Comparación | 11 | **Completo.** GridSearchCV de TF-IDF + KNN con coseno y `brute`: 12 combinaciones y las mismas particiones. |
 | 3. Comparación | 12 | **Completo.** Tabla y gráfico de tiempos: lote fijo de 1.000 mensajes, cuatro tamaños y tres repeticiones de cada pipeline. |
-| 4. Resultados | 13 | Completar y probar `derivar` y `evaluar_derivacion`. |
-| 4. Resultados | 14 | Obtener probabilidades fuera de muestra con `cross_val_predict` en entrenamiento y elegir ambos umbrales con margen de seguridad, para cada modelo. |
-| 4. Resultados | 15 | Evaluar una sola vez en prueba: tabla de cinco indicadores para ambos modelos y mesa de entrada; reporte y matriz del modelo elegido. |
-| 4. Resultados | 16 | Analizar diez errores de derivación automática, sus causas y una mejora concreta por error. |
-| 4. Resultados | 17 | Estimar el impacto diario sobre 6.500 mensajes. |
-| 4. Resultados | 18 | Reentrenar el modelo elegido con todos los históricos limpios y derivar los mensajes nuevos. |
-| 4. Resultados | 19 | Generar y verificar `predicciones_caso1.csv`: 2.040 filas y columnas `id_mensaje`, `equipo_predicho`, `prob_max`, `prob_fraude`, `derivacion`. |
-| 4. Resultados | 20 | Preparar `informe_ejecutivo.pdf` para Laura Benítez. |
+| 4. Resultados | 13 | **Completo.** Derivación con prioridad de fraude y evaluación con denominadores definidos; cuatro pruebas aprobadas. |
+| 4. Resultados | 14 | **Completo.** OOF de ambos pipelines, 56 pares por modelo y análisis de sensibilidad; umbrales provisionales fijados antes de prueba. |
+| 4. Resultados | 15 | **Completo.** Evaluación única de los tres métodos sobre 1.586 mensajes, cinco indicadores descriptivos, reporte y matriz de KNN. |
+| 4. Resultados | 16 | **Completo.** Diez errores automáticos reales, descripciones anonimizadas, posibles causas y mejoras propuestas. |
+| 4. Resultados | 17 | **Completo.** Proyección sobre 6.500 mensajes, separando cortos y aptos, con comparación manual sobre la misma fracción apta. |
+| 4. Resultados | 18 | **Completo.** KNN reajustado con 7.930 históricos aptos y aplicado a los mensajes nuevos; cortos forzados a revisión. |
+| 4. Resultados | 19 | **Completo.** CSV UTF-8 local validado: 2.040 filas y las cinco columnas exigidas, sin agregar índice ni quitar duplicados nuevos. |
+| 4. Resultados | 20 | **Completo.** Informe ejecutivo de tres páginas A4 para Laura Benítez, generado con agregados y revisado visualmente. |
 
-El detalle de los doce primeros pasos está en el notebook. Los datos originales, los preparados y los resultados de validación se distinguen en `descripcion.md`. El próximo paso pendiente es implementar la regla de derivación del paso 13.
+El detalle de todos los pasos está en el notebook. `descripcion.md` distingue datos originales, validación, evaluación final y proyección. El desarrollo funcional está cerrado; los criterios pendientes limitan la aprobación para una implementación real.
 
 ## Código y qué exigen las pruebas
 
@@ -37,7 +37,7 @@ El detalle de los doce primeros pasos está en el notebook. Los datos originales
 | `src/naive_bayes.py` | `log_suma_exp(a, axis=1)` normaliza con estabilidad numérica. `NaiveBayesMultinomial(alpha=1.0)` implementa `fit(X, y)`, `_log_verosimilitud_conjunta(X)`, `predict_log_proba(X)`, `predict_proba(X)` y `predict(X)`. `fit` devuelve `self` y crea `classes_`, `class_count_`, `feature_count_`, `class_log_prior_` y `feature_log_prob_`, con clases ordenadas. `terminos_mas_indicativos(modelo, vocabulario, n=10)` devuelve un diccionario de listas ordenadas por diferencia entre el logaritmo de la probabilidad del término en la clase y su promedio en las otras clases. Las pruebas verifican conteos a mano, equivalencia con scikit-learn para cuatro valores de alpha, matrices densas y dispersas, probabilidades finitas que suman uno, Pipeline, clonación y GridSearchCV. La matemática usa sólo NumPy; se permite heredar de `ClassifierMixin` y `BaseEstimator`. |
 | `src/derivacion.py` | `derivar(proba, clases, umbral_fraude, umbral_confianza)` recibe una matriz de probabilidades y las clases en el orden de sus columnas. Devuelve un array de destinos: primero fraude si su probabilidad es `>= umbral_fraude`; después la clase más probable si su confianza es `>= umbral_confianza`; en el resto, `REVISION = "revision_humana"`. `evaluar_derivacion(y_real, destino)` devuelve las proporciones `cobertura`, `exactitud_automatica` y `fraude_perdido`, entre 0 y 1. Las pruebas comprueban prioridad, igualdad con el umbral, revisión, derivación de todos los casos y los denominadores de cada indicador. Sólo NumPy. |
 
-Se conservarán las interfaces, los tests y `conftest.py`. Los valores usados en las pruebas de derivación son ejemplos para verificar la lógica, no umbrales elegidos para Cauce. Antes de la implementación conviene definir qué devolverá la evaluación si no hay casos automáticos o fraudes: los tests originales no cubren esos extremos.
+Se conservaron las interfaces, los tests y `conftest.py`. Los valores usados en las pruebas de derivación son ejemplos para verificar la lógica, no metas de Cauce. Los indicadores sin denominador devuelven NaN y sus casos especiales se comprobaron sin modificar las pruebas originales.
 
 ## Decisiones y restricciones para las siguientes etapas
 
@@ -47,12 +47,12 @@ Los mensajes con menos de dos palabras limpias irán a revisión humana también
 
 Las grillas de parámetros ya se evaluaron y sus mejores estimadores se conservan en memoria al ejecutar el notebook. La comparación de tiempos usa copias de esas configuraciones: reserva un lote fijo de 1.000 mensajes del entrenamiento y ajusta con 25%, 50%, 75% y 100% de los 5.344 restantes. Ese lote no entra al ajuste de los modelos medidos y prueba no se usa en el experimento.
 
-Antes de cerrar el paso 15 hay que consultar al docente cuáles son los cinco indicadores de aceptación y sus metas: `evaluar_derivacion` especifica tres, y los materiales entregados no completan esa lista. También queda por definir cómo expresar el margen de seguridad del paso 14, usando los resultados de validación y los criterios del caso.
+Los materiales no completan los cinco indicadores oficiales, sus metas ni el margen de seguridad. Se usaron cinco indicadores descriptivos y un criterio provisional propio de mejora respecto de la mesa, estable en particiones y umbrales vecinos. Esas definiciones siguen pendientes de confirmación; también se propone revisar la posible inconsistencia de etiqueta observada.
 
 Los entregables explícitos son el notebook resuelto, los módulos completos con sus pruebas aprobadas, `predicciones_caso1.csv` e `informe_ejecutivo.pdf`. El notebook debe incluir las tablas, gráficos y explicaciones de sus pasos y entregarse después de reiniciar y ejecutar todo. No aparece una rúbrica con puntajes en los materiales disponibles.
 
 ## Preguntas de reflexión
 
-Al terminar se responderán en un párrafo cada una, apoyándose en los resultados: por qué Naive Bayes puede clasificar bien pese a la independencia y cómo afecta sus probabilidades; qué ocurre con `alpha=0` ante términos no observados en fraude; por qué no usar `equipo_derivado`; costo de KNN y cuándo elegirlo; quién fija las metas de fraude perdido y exactitud; cómo detectar una categoría nueva, como seguros para celulares; y qué datos personales anonimizar y cómo influye en el modelo.
+Las siete preguntas están respondidas con los resultados y sus límites: independencia y probabilidades, suavizado, entrada del clasificador, costo de KNN, definición de metas, nuevas categorías y privacidad. Se conservaron sus enunciados originales.
 
 La guía de Naive Bayes, su código de ejemplo y los materiales de KNN se usarán para estudiar. Sus ejercicios de clima, préstamos, spam e Iris no se incorporan a la consigna de Cauce. El código complementario de Naive Bayes mezcla atributos categóricos y gaussianos: sirve como referencia de Bayes y logaritmos, pero Cauce requiere la variante multinomial de conteos.

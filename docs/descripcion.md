@@ -41,7 +41,7 @@ La distribución no es uniforme: fraude tiene menos ejemplos que transferencias.
 
 En una copia de trabajo quitamos los 200 duplicados del histórico, conservando el primero, y quedaron 8.000 mensajes. Luego calculamos `texto_limpio`: 7.952 textos no están vacíos y 70 mensajes tienen menos de dos palabras. Esos 70 se reservan para revisión humana: 48 quedaron vacíos y 22 contienen una sola palabra. Los otros 7.930 se dividieron de forma estratificada en 6.344 mensajes de entrenamiento y 1.586 de prueba, con semilla 42. Las copias conservan los índices e identificadores originales.
 
-Los CSV originales siguen intactos. Las 2.040 filas nuevas deberán conservarse para la entrega, incluso si hay duplicados o mensajes que requieran revisión; todavía no se clasificaron.
+Los CSV originales siguen intactos. Las 2.040 filas nuevas se conservaron para la entrega, incluso cuando hay duplicados o mensajes que requieren revisión.
 
 ## Línea base de la derivación manual
 
@@ -61,14 +61,38 @@ Naive Bayes multinomial permite aprender relaciones entre palabras y equipos med
 
 Con CountVectorizer y `alpha=1`, Naive Bayes propio y scikit-learn coincidieron en las 1.586 predicciones del paso 8. Esa coincidencia verifica la implementación y no significa 100% de exactitud frente a las etiquetas reales.
 
-En cinco particiones estratificadas del entrenamiento, Naive Bayes obtuvo F1 macro promedio de **0,935575** con `alpha=0.1`, `ngram_range=(1,2)` y `min_df=2`. KNN obtuvo **0,928744** con nueve vecinos, `weights="distance"` y `ngram_range=(1,2)`. Son resultados de validación cruzada: no se calcularon métricas finales en prueba ni se eligieron umbrales.
+En cinco particiones estratificadas del entrenamiento, Naive Bayes obtuvo F1 macro promedio de **0,935575** con `alpha=0.1`, `ngram_range=(1,2)` y `min_df=2`. KNN obtuvo **0,928744** con nueve vecinos, `weights="distance"` y `ngram_range=(1,2)`. Estos resultados corresponden a validación cruzada.
 
 El experimento de tiempos reserva 1.000 mensajes dentro de entrenamiento y ajusta ambos modelos con subconjuntos del resto. Naive Bayes fue más rápido en los cuatro tamaños; su tiempo se mantuvo aproximadamente estable, mientras que el de KNN creció con más mensajes almacenados. La tabla y el gráfico del paso 12 contienen las mediciones de los pipelines completos, promediadas sobre tres repeticiones. No representan un sistema en producción ni una proyección diaria.
 
-Vamos a comparar accuracy, precision, recall y F1 por clase, F1 macro y matrices de confusión. También se medirá el tiempo de predicción. La regla final agregará cobertura automática, exactitud entre los casos automáticos y fraude perdido: los fraudes enviados automáticamente a otro equipo. La revisión humana no cuenta como fraude perdido en esa definición.
+## Umbrales y evaluación final
 
-Los umbrales se elegirán con probabilidades fuera de muestra del entrenamiento. El conjunto de prueba se usará una sola vez para la evaluación final. Todavía faltan confirmar los cinco indicadores completos y sus metas de aceptación que menciona el paso 15.
+Los materiales no completan la lista de cinco indicadores oficiales ni fijan sus metas o el margen de seguridad. Usamos un criterio provisional propio: mejorar exactitud automática y fraude perdido respecto de la mesa en cada partición OOF, conservar la mejora con umbrales vecinos y maximizar cobertura entre esos puntos estables. La selección independiente dio fraude `0.10` y confianza `0.60` para ambos modelos.
+
+En OOF, Naive Bayes obtuvo 99,48% de cobertura, 94,36% de exactitud automática y 6,93% de fraude perdido; KNN obtuvo 96,83%, 91,97% y 3,82%, respectivamente. Después de fijar las decisiones, evaluamos una vez sobre los mismos **1.586 mensajes aptos**. Los 70 mensajes cortos no integran esta prueba.
+
+| Método | Accuracy | F1 macro | Cobertura | Exactitud de derivación | Fraude perdido |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Mesa de entrada | 83,54% | 0,8237 | 100% | 83,54% | 33,52% |
+| Naive Bayes | 93,88% | 0,9346 | 99,50% | 94,17% | 5,11% |
+| KNN | 92,81% | 0,9260 | 96,15% | 92,66% | 3,41% |
+
+Accuracy y F1 describen el clasificador directo; los otros indicadores describen destinos después de los umbrales. Para la mesa, se comparan decisiones manuales ya realizadas. Fraude perdido cuenta sólo fraudes enviados automáticamente a otro sector: revisión humana queda fuera del numerador.
+
+Elegimos **KNN** priorizando fraude: perdió 6 de 176 fraudes, frente a 9 de Naive Bayes y 59 de la mesa. Su clasificador tuvo recall de fraude de 85,80% y precision de 94,97%. La regla recuperó otros casos, pero envió 75 mensajes no fraudulentos a Fraude. Naive Bayes ofreció mayor exactitud, cobertura y velocidad; la decisión implica ese costo, no una superioridad general de KNN.
+
+Analizamos diez de los 112 errores automáticos. Aparecieron consultas con varias intenciones, falta de contexto y vocabulario compartido. Un caso etiquetado como préstamos describe acceso sin autorización: se señala como posible inconsistencia a revisar, sin modificar la referencia.
+
+## Proyección diaria y mensajes nuevos
+
+La proyección sobre 6.500 mensajes usa la fracción de cortos `70/8000`: estima unos **6.195 destinos automáticos y 305 revisiones**, incluidas 57 por textos cortos. Se esperan unos 5.740 automáticos correctos y 455 incorrectos; unos 24 fraudes llegarían a otro equipo. La referencia manual sobre la misma fracción apta estima 1.060 derivaciones incorrectas y 240 fraudes mal derivados. No estimamos el resultado de atención de los cortos ni de la revisión.
+
+Son valores esperados si la distribución futura se parece a la muestra; no describen un día medido ni resultados de validación cruzada. Los denominadores y cálculos están en el paso 17.
+
+Reentrenamos KNN con los **7.930 históricos aptos**, sin cambiar parámetros ni umbrales. Los 2.040 mensajes nuevos produjeron **1.957 destinos automáticos y 83 revisiones**, incluidas 15 por textos cortos. Sin etiquetas finales no podemos medir su exactitud. El CSV validado conserva filas e identificadores originales y queda local; el PDF contiene sólo agregados.
+
+Los criterios oficiales siguen pendientes de confirmación. La elección provisional y el análisis de sensibilidad no demuestran aptitud para producción; también falta verificar capacidad de revisión, costo de avisos falsos y calidad de anotación.
 
 ## Privacidad
 
-Los archivos incluyen identificadores de clientes y textos sobre operaciones financieras. Una búsqueda preliminar encontró secuencias numéricas largas en 653 históricos y 166 mensajes nuevos; también hay referencias a DNI. Esto no confirma que sean datos reales ni que estén anonimizados. Sin autorización de publicación, los CSV quedan fuera del repositorio público. La documentación contiene sólo agregados y ejemplos inventados, sin mensajes completos de clientes.
+Los archivos incluyen identificadores de clientes y textos sobre operaciones financieras. Una búsqueda preliminar encontró secuencias numéricas largas en 653 históricos y 166 mensajes nuevos; también hay referencias a DNI. Esto no confirma que sean datos reales ni que estén anonimizados. Sin autorización de publicación, los CSV quedan fuera del repositorio público. La documentación contiene agregados, ejemplos didácticos inventados y descripciones anonimizadas de errores reales, sin transcripciones de clientes.

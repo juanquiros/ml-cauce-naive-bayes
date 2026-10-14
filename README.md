@@ -17,7 +17,11 @@ Predecir `equipo_final` a partir del texto del mensaje. La decisión de derivaci
 
 Implementamos Naive Bayes multinomial desde cero con NumPy y comprobamos que sus predicciones coinciden con `MultinomialNB` de scikit-learn. Lo comparamos con KNN usando TF-IDF y distancia coseno, con ajuste de parámetros mediante validación cruzada.
 
-Los pasos 1 al 12 del notebook están resueltos y ejecutados: preparación de datos, entrenamiento, equivalencia de Naive Bayes, términos indicativos, ajuste de ambos modelos y comparación de tiempos. Los pasos 13 al 20 siguen pendientes: derivación, umbrales, evaluación final e informe. El conjunto de prueba se mantiene reservado para esa evaluación, salvo la comprobación de equivalencia del paso 8.
+Los 20 pasos y las siete preguntas de reflexión están completos. Elegimos KNN para el ejercicio porque perdió menos fraudes al aplicar la regla de derivación, aunque Naive Bayes tuvo mejores métricas generales y predijo más rápido.
+
+Sobre 1.586 mensajes de prueba, KNN obtuvo 92,81% de accuracy y F1 macro de 0,9260. La regla cubrió 96,15% de los mensajes con 92,66% de exactitud automática y 3,41% de fraude perdido; la mesa perdió 33,52% del fraude sobre los mismos registros.
+
+Los umbrales provisionales son fraude `0.10` y confianza `0.60`, elegidos con probabilidades OOF antes de evaluar prueba. Los criterios oficiales de aceptación siguen pendientes de confirmación.
 
 ## Datos
 
@@ -29,7 +33,7 @@ El detalle de los datos y de la línea base está en [la descripción del caso](
 
 ## Tecnologías
 
-Python 3.10 o posterior; NumPy, pandas, SciPy, scikit-learn, matplotlib, pytest y JupyterLab. SciPy se necesita para las matrices dispersas y las pruebas; los cálculos del clasificador propio usarán sólo NumPy.
+Python 3.10 o posterior; NumPy, pandas, SciPy, scikit-learn, matplotlib, pytest, JupyterLab y ReportLab para el informe PDF. SciPy se necesita para las matrices dispersas y las pruebas; los cálculos del clasificador propio y de derivación usan sólo NumPy.
 
 ## Ejecución
 
@@ -50,9 +54,15 @@ En otra terminal, desde la raíz:
 
 En Linux o macOS, usá `.venv/bin/python` en lugar de `.venv\Scripts\python.exe`. Abrí JupyterLab desde `caso1_cauce/` para que funcionen las rutas relativas del notebook.
 
-Por ahora, ejecutá las celdas desde el inicio hasta el paso 12. Las búsquedas usan cinco particiones estratificadas, semilla 42 y grillas de 16 combinaciones para Naive Bayes y 12 para KNN. Los tiempos se calculan con tres repeticiones y pueden variar según el equipo y la carga de ejecución.
+Reiniciá el kernel y ejecutá todo el notebook. Las búsquedas usan cinco particiones estratificadas y semilla 42; la selección OOF de umbrales precede a la evaluación final. Los tiempos se calculan con tres repeticiones y pueden variar según el equipo y la carga de ejecución.
 
-Las 15 pruebas de limpieza y las 12 de Naive Bayes aprueban. Las cuatro de derivación siguen fallando con `NotImplementedError` porque ese módulo está pendiente.
+Las 31 pruebas originales aprueban: 15 de limpieza, 12 de Naive Bayes y cuatro de derivación.
+
+## Entregables
+
+- [Notebook completo](caso1_cauce/caso1_cauce.ipynb), con resultados y reflexiones.
+- [Informe ejecutivo para Laura Benítez](caso1_cauce/informe_ejecutivo.pdf), con información agregada.
+- `caso1_cauce/predicciones_caso1.csv`: 2.040 filas con las cinco columnas exigidas. Se genera al ejecutar el notebook y se entrega localmente porque contiene identificadores. Hay 1.957 destinos automáticos y 83 revisiones, incluidas 15 por textos cortos.
 
 ## Estructura
 

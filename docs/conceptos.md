@@ -152,7 +152,7 @@ Baja si una de las dos métricas es baja. F1 macro promedia el F1 de las cinco c
 
 **Umbrales de decisión.** Son límites que transforman las probabilidades en una acción. En Cauce primero se compara `P(fraude)` con `umbral_fraude`; después, si no se activa esa prioridad, se compara la probabilidad máxima con `umbral_confianza`. Si ninguna condición se cumple, el destino es revisión humana. Las comparaciones incluyen la igualdad (`>=`).
 
-Bajar el umbral de fraude puede recuperar más fraudes y enviar más casos de otros equipos a ese sector. Subir el de confianza suele reducir la cobertura automática y aumentar la revisión. Se elegirán con validación y criterios de aceptación, sin tomar los números de los tests como valores definitivos.
+Bajar el umbral de fraude puede recuperar más fraudes y enviar más casos de otros equipos a ese sector. Subir el de confianza suele reducir la cobertura automática y aumentar la revisión. Los elegimos con probabilidades OOF, sin tomar los números de los tests como valores definitivos. Como faltan metas oficiales, el punto es provisional: mejora respecto de la mesa en cada partición y en umbrales vecinos, con la mayor cobertura entre esos puntos estables.
 
 La evaluación de la regla distingue:
 
@@ -163,3 +163,5 @@ La evaluación de la regla distingue:
 | Fraude perdido | Fraudes enviados automáticamente a otro equipo / fraudes reales. Mide los casos críticos que se desvían; revisión humana no cuenta como pérdida. |
 
 El recall del clasificador y el fraude perdido de la regla tienen definiciones distintas. Un mensaje enviado a revisión no queda reconocido automáticamente como fraude, pero tampoco se considera perdido según el contrato de `evaluar_derivacion`.
+
+Si un indicador no tiene denominador, `evaluar_derivacion` devuelve NaN: no hay una proporción observada. Por ejemplo, sin mensajes automáticos la cobertura puede ser cero, pero la exactitud automática no está definida. Sin fraudes reales, el fraude perdido tampoco está definido. En un conjunto vacío, los tres indicadores quedan no disponibles.
