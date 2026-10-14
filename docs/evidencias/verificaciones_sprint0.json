@@ -1,0 +1,21 @@
+{
+  "fecha_usuario": "2026-10-14",
+  "originales_locales_verificados": 12,
+  "originales_versionados_verificados": 10,
+  "datasets_originales_solo_locales": 2,
+  "pasos_notebook": 20,
+  "reflexiones_registradas_sin_responder": 7,
+  "casos_pytest": 31,
+  "pytest_fallidos_por_pendientes": 30,
+  "pytest_aprobados": 1,
+  "pip_check": "No broken requirements found.",
+  "recuperacion_csv_desde_cero_en_carpeta_aislada": "correcta; hashes coinciden",
+  "recuperacion_idempotente_sobre_existentes": "correcta; sin sobrescritura",
+  "segunda_auditoria": "JSON agregado idéntico a la primera",
+  "enlaces_markdown_locales": "correctos",
+  "scripts_auxiliares": "sintaxis válida; ejecuciones correctas",
+  "notebook_original_sin_salidas": true,
+  "caso2_nodo_incorporado": false,
+  "algoritmos_implementados_en_sprint0": false,
+  "notebook_resuelto_en_sprint0": false
+}
