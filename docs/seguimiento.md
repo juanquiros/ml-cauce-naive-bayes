@@ -19,11 +19,11 @@ Los siguientes sprints requieren nuevas instrucciones del usuario.
 - [x] Crear roadmap, conceptos, requisitos, seguimiento y diagnóstico.
 - [x] Crear README, .gitignore y reglas permanentes en AGENTS.
 - [x] Revisar coherencia, enlaces, alcance e integridad de entregables.
-- [ ] Registrar SHA de commits y resultado real de publicación en el cierre de Git.
+- [x] Registrar SHA de commits y resultado real de publicación en el cierre de Git.
 
-Criterio de finalización: documentación y evidencia verificadas, originales
-preservados, sin algoritmos implementados y cambios versionados. El registro de
-Git se cierra al final de la entrega; no constituye autorización para iniciar S1.
+Criterio de finalización verificado: documentación y evidencia revisadas,
+originales preservados, sin algoritmos implementados y cambios versionados y
+publicados. No constituye autorización para iniciar S1.
 
 ## Sprint 1 · Pendiente · Pasos 1–6
 
@@ -114,6 +114,24 @@ documentados, no resultados inventados ni bloqueos de toda la implementación.
 
 ## Registro de commits importantes y publicación
 
-Se completa al verificar los commits y el remoto; no se considera un push
-realizado por el solo hecho de que existan credenciales. Los detalles finales
-de este bloque se actualizan durante el cierre de S0.
+| Commit | SHA | Contenido |
+| --- | --- | --- |
+| Preparar materiales originales de Cauce y proteger los datos locales | `276be59747f139efe277aecac6a0dd2e2c45dfbd` | Base de main: originales sin CSV, reglas permanentes, protección de datos y manifiesto. |
+| Documentar el Sprint 0 y agregar auditorías reproducibles | `85ba68cb178d7ae016004089934b9cdf198adeda` | Cinco documentos obligatorios, inventario técnico, README, evidencia y scripts auxiliares. |
+| Registrar el cierre verificado y la publicación del Sprint 0 | Consultar `git log -1 --format=%H -- docs/seguimiento.md` | Este cierre: checklist final y publicación comprobada. Su SHA completo se informa en el reporte de entrega. |
+
+Rama de trabajo: `codex/sprint-0`, con seguimiento de `origin/codex/sprint-0`.
+`main` contiene la base de materiales originales. Origin apunta al repositorio
+solicitado. El comando `git push -u origin main codex/sprint-0` finalizó con
+salida 0 y creó ambas ramas; `git ls-remote origin` confirmó sus SHA. El commit
+de cierre se publica en la misma rama mediante un push adicional, sin force push.
+
+Pull request abierto contra main:
+[Preparar el Sprint 0 del proyecto académico Cauce](https://github.com/juanquiros/ml-cauce-naive-bayes/pull/1).
+No se fusionó el PR. El árbol quedó limpio tras los commits y no hay CSV,
+entornos virtuales ni temporales versionados. El SHA final y su coincidencia
+con el remoto se verifican después del último push y se informan en la entrega.
+
+Verificación de cierre: [verificaciones_sprint0.json](evidencias/verificaciones_sprint0.json).
+También se comprobaron recuperación de CSV desde cero en una carpeta aislada,
+recuperación idempotente y una segunda auditoría idéntica a la evidencia guardada.
