@@ -56,11 +56,11 @@ $$
 
 `n_ct` cuenta las apariciones del término `t` en los documentos de la clase `c`; `T_c` es el total de apariciones de todos los términos de esa clase; `V` es el tamaño del vocabulario; y `alpha` es el suavizado aditivo. Con `alpha=1` se llama Laplace. Como ejemplo, si “robaron” aparece 3 veces entre 20 términos de fraude y el vocabulario tiene 10 términos, su probabilidad suavizada es `(3+1)/(20+10)=4/30`.
 
-Con `alpha=0`, un término conocido en el vocabulario pero no observado en una clase puede anular su verosimilitud. Una palabra totalmente fuera del vocabulario no crea una columna nueva al predecir: el vectorizador la ignora.
+Con `alpha=0`, un término conocido en el vocabulario pero no observado en una clase puede anular su verosimilitud. Si todas las clases quedan con probabilidad cero, no se puede normalizar: la implementación informa un error y pide suavizado positivo. Una palabra totalmente fuera del vocabulario no crea una columna nueva al predecir: el vectorizador la ignora.
 
 ### Puntajes, logaritmos y normalización
 
-Multiplicar muchas probabilidades pequeñas puede producir underflow: la computadora redondea el resultado a cero. El clasificador sumará logaritmos:
+Multiplicar muchas probabilidades pequeñas puede producir underflow: la computadora redondea el resultado a cero. El clasificador suma logaritmos:
 
 $$
 s_c(x)=\log P(c)+\sum_{t=1}^{V}x_t\log P(t\mid c),
@@ -77,9 +77,9 @@ $$
 \qquad m=\max_j s_j(x).
 $$
 
-`j` recorre las clases y `m` es el puntaje máximo del mensaje. La resta del máximo estabiliza la suma de exponenciales, que calculará `log_suma_exp`. Finalmente, `P(c | x)` se obtiene aplicando la exponencial al logaritmo normalizado.
+`j` recorre las clases y `m` es el puntaje máximo del mensaje. La resta del máximo estabiliza la suma de exponenciales, que calcula `log_suma_exp`. Finalmente, `P(c | x)` se obtiene aplicando la exponencial al logaritmo normalizado.
 
-Para interpretar el modelo, `terminos_mas_indicativos` comparará el logaritmo de la probabilidad de cada término en una clase con su promedio en las otras. Esto destaca palabras que diferencian equipos, no simplemente las palabras más frecuentes.
+Para interpretar el modelo, `terminos_mas_indicativos` compara el logaritmo de la probabilidad de cada término en una clase con su promedio en las otras. Esto destaca palabras que diferencian equipos, no simplemente las palabras más frecuentes. La función está implementada; su aplicación al histórico queda para el paso 9.
 
 ## Representación del texto y KNN
 

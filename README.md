@@ -10,9 +10,9 @@ Predecir `equipo_final` a partir del texto del mensaje. La decisión de derivaci
 
 ## Algoritmos
 
-Vamos a implementar Naive Bayes multinomial desde cero con NumPy y comprobar sus resultados contra `MultinomialNB` de scikit-learn. Después lo compararemos con KNN usando TF-IDF y distancia coseno.
+Implementamos Naive Bayes multinomial desde cero con NumPy. Las pruebas comprueban sus cálculos contra `MultinomialNB` de scikit-learn. Después lo compararemos con KNN usando TF-IDF y distancia coseno.
 
-Por ahora están preparados los materiales y el análisis inicial. Las funciones del docente y las actividades del notebook siguen pendientes.
+Los pasos 1 al 6 del notebook están resueltos: exploración, línea base manual, duplicados, limpieza, preparación de textos y una demostración de Naive Bayes con ejemplos inventados. Los pasos 7 al 20 siguen pendientes; el modelo todavía no se entrenó con el histórico de Cauce.
 
 ## Datos
 
@@ -45,7 +45,7 @@ En otra terminal, desde la raíz:
 
 En Linux o macOS, usá `.venv/bin/python` en lugar de `.venv\Scripts\python.exe`. Abrí JupyterLab desde `caso1_cauce/` para que funcionen las rutas relativas del notebook.
 
-Las pruebas de las funciones pendientes van a fallar con `NotImplementedError` hasta que se complete su implementación.
+Las 15 pruebas de limpieza y las 12 de Naive Bayes aprueban. Las cuatro de derivación siguen fallando con `NotImplementedError` porque ese módulo está pendiente.
 
 ## Estructura
 

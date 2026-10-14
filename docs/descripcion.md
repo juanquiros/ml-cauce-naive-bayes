@@ -30,7 +30,7 @@ Estas son las categorías exactas de `equipo_final`; se conservarán sin cambios
 | `prestamos_inversiones` | 1.029 | 12,55% | 12,58 |
 | `fraude` | 914 | 11,15% | 18,22 |
 
-La distribución no es uniforme: fraude tiene menos ejemplos que transferencias. Hay 72 históricos con menos de dos palabras **antes de limpiar**. Ese número se volverá a calcular sobre `texto_limpio` en el paso 5.
+La distribución no es uniforme: fraude tiene menos ejemplos que transferencias. Hay 72 históricos con menos de dos palabras **en los datos originales, antes de quitar duplicados y limpiar**.
 
 | Canal | Históricos | Nuevos |
 | --- | ---: | ---: |
@@ -39,7 +39,9 @@ La distribución no es uniforme: fraude tiene menos ejemplos que transferencias.
 | `email` | 1.163 | 310 |
 | `formulario_web` | 862 | 212 |
 
-En la próxima etapa se quitarán los duplicados del histórico en una copia de trabajo, conservando el primero, antes de dividir entrenamiento y prueba. Los originales seguirán intactos. Las 2.040 filas nuevas deberán conservarse para la entrega, incluso si hay duplicados o mensajes que requieran revisión.
+En una copia de trabajo quitamos los 200 duplicados del histórico, conservando el primero, y quedaron 8.000 mensajes. Luego calculamos `texto_limpio`: 7.952 textos no están vacíos y 70 mensajes tienen menos de dos palabras. Esos 70 se reservan para revisión humana: 48 quedaron vacíos y 22 contienen una sola palabra. Los otros 7.930 son aptos para entrenamiento. Las copias conservan los índices e identificadores originales y todavía no se dividieron en entrenamiento y prueba.
+
+Los CSV originales siguen intactos. Las 2.040 filas nuevas deberán conservarse para la entrega, incluso si hay duplicados o mensajes que requieran revisión; todavía no se clasificaron.
 
 ## Línea base de la derivación manual
 
@@ -51,7 +53,7 @@ Comparando `equipo_derivado` con `equipo_final` en las 8.200 filas originales:
 - 290 de los 914 mensajes de fraude llegaron a otro sector: **31,73% del fraude real**.
 - 256 mensajes de otros sectores fueron enviados a fraude.
 
-Estos números describen la mesa de entrada; todavía no hay resultados de modelos entrenados. La referencia del escenario, aproximadamente un error cada seis mensajes, es coherente con esta muestra, pero no reemplaza la medición.
+Estos números describen la mesa de entrada; todavía no hay resultados de modelos entrenados con el histórico. La referencia del escenario, aproximadamente un error cada seis mensajes, es coherente con esta muestra, pero no reemplaza la medición.
 
 ## Cómo vamos a resolverlo y evaluarlo
 
