@@ -1,0 +1,28 @@
+{
+  "algoritmo": "SHA-256",
+  "archivos_docentes": {
+    "requirements.txt": "4f1b8818c78c6be76135720eb1c7bd4b51113e2eab519169a266d383025e8b0b",
+    "caso1_cauce/src/naive_bayes.py": "b67cb6edfec0ecf0652491e02ea81b715702286c014de6ba9c8cf75712bf7e74",
+    "caso1_cauce/src/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "caso1_cauce/src/limpieza.py": "0aae5741b3c7a6880402cb8c76ad7c15a7b2100dd30ddf92a42e7053320e6e48",
+    "caso1_cauce/src/derivacion.py": "6366103f7a955da85bc8ed5276abac1793196e9c7dbb95e4f0508af7ae371cd1",
+    "caso1_cauce/tests/test_limpieza.py": "92e82b917dcdd454b8a0e15ca3446c0f844dcf162a4e7ff1707c114ead43ba59",
+    "caso1_cauce/tests/test_derivacion.py": "461bdfed4b19b81c8423daa5cd33ffa0aba7d9710ef283e999b7759bd37d1b18",
+    "caso1_cauce/tests/test_naive_bayes.py": "e6353c235d3ff94d79b979aff30ec436e32a5b905beb07a5bfcf5287cd483b51",
+    "caso1_cauce/caso1_cauce.ipynb": "c7ac516613b3ec063200132ce22b149da954e77a5912a37d7811f25d907a04c1",
+    "caso1_cauce/datos/mensajes_historicos.csv": "a059cc94a237f0f074f14d28adf6085f8c243f92664e457fc58e9d41c6e31ae3",
+    "caso1_cauce/datos/mensajes_nuevos.csv": "0b2dfd02ffd47f963fa336e28fc80cff59479ccda1063803ea54e7ae597263fe",
+    "caso1_cauce/conftest.py": "5a07ac604579e865618d8f75032a3fb3459fa3b0e3282562c519d12311136dba"
+  },
+  "materiales_referencia": {
+    "explicacion_escenarios.docx": "eea6803cbee9d3c3fb3f8615ae55b10d37e098d228ad9ab0c3cb767bfb8350fe",
+    "Guia_Naive_Bayes_Sesion4.docx": "2396ee6c7eb4f4724cae5a239769566df417b99c9335408df1d3f292ccaa9536",
+    "knn.pdf": "3d288beaf00b9d8a67f7f0ffa0bcb318d7b5b3e6f6e62134ebadeef49c4f1996",
+    "M301_K-Vecinos_mas_Cercanos_sin.pdf": "9dc408c4b4303a5d44ae56754d47ab5dd0504ed1b5875a9aef059791f00b57a7",
+    "materiales_estudiantes.zip": "3ce14d52d216c557ebe241559881fc1817db15210295a3c9f18f6444457da870",
+    "ML_Clase_05_1_K_Vecinos_Más_Cercanos.ipynb": "4f9918fad669fb5087a0acd32d16c09e9c99ec9ec236bcf9b15929ac0b867cb7",
+    "naive_bayes_desde_cero.py": "c9073c6a7b77cd7f89ec9cbb466a1384f066d95568a7f9d2e3018e3adf55b1f4",
+    "NB.pdf": "20d0383f2d44a9be0612652d548ca9d4e1dc0317e706651d0f351b6345fbda78"
+  },
+  "verificacion": "Todos los archivos docentes recuperados coinciden byte a byte con el ZIP; no incluye caso2_nodo."
+}

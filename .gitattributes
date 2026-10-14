@@ -1,0 +1,13 @@
+# Evitar que core.autocrlf cambie los bytes originales del docente al clonar.
+/requirements.txt -text
+/caso1_cauce/src/*.py -text
+/caso1_cauce/tests/*.py -text
+/caso1_cauce/conftest.py -text
+/caso1_cauce/caso1_cauce.ipynb -text
+
+# Documentación y herramientas propias con saltos reproducibles.
+*.md text eol=lf
+*.json text eol=lf
+/scripts/*.py text eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf
