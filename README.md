@@ -15,7 +15,7 @@ etiqueta correcta será `equipo_final`. Las clases reales son `cuenta_acceso`,
 planificación. Los módulos siguen con sus `NotImplementedError`, el notebook
 docente está sin resolver y los sprints 1 a 3 están pendientes. La aceptación
 final requiere aclaraciones del docente registradas en [requisitos](docs/requisitos.md).
-Cambios publicados para revisión en el [pull request del Sprint 0](https://github.com/juanquiros/ml-cauce-naive-bayes/pull/1).
+Cambios publicados para revisión en el [pull request del Sprint 0](https://github.com/juanquiros/ml-cauce-naive-bayes/pull/2).
 
 ## Estructura
 

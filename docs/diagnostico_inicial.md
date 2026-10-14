@@ -38,7 +38,7 @@ revisadas ni archivos del proyecto que preservar fuera de Git.
 
 Se configuró `origin` con
 `https://github.com/juanquiros/ml-cauce-naive-bayes.git` y se creó
-`codex/sprint-0`. `git ls-remote` al URL indicado finalizó correctamente y no
+`sprint-0`. `git ls-remote` al URL indicado finalizó correctamente y no
 devolvió refs: remoto vacío. El conector GitHub confirmó repo **público**, tamaño
 0, rama predeterminada `main` y permisos de push. GitHub CLI (`gh`) no está
 instalado; Git sí funciona. El resultado final de commits/publicación se registra
@@ -68,10 +68,13 @@ los requisitos originales. No se cambió el Python global ni el requirements doc
 | pytest | 8.0 | 9.1.1 |
 | JupyterLab | 4.0 | 4.6.4 |
 
-Comandos reales, desde la raíz salvo pytest:
+La creación del entorno se realizó con la ruta absoluta del intérprete Python
+3.12.14 disponible. El primer comando siguiente es su equivalente con el launcher
+de Python; los demás corresponden a la instalación y auditoría ejecutadas.
+Se ejecutan desde la raíz salvo pytest:
 
 ```powershell
-& 'C:\Users\quiro\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' -m venv .venv
+py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 .\.venv\Scripts\python.exe -m pip check
 .\.venv\Scripts\python.exe -m pip freeze

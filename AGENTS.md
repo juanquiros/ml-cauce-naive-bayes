@@ -18,7 +18,8 @@ del notebook durante el Sprint 0.
   Argentina, con lenguaje claro y académico. Explicá los conceptos importantes.
 - Antes de cambiar archivos, revisá estado, rama, historial y remotos de Git.
   `origin` debe ser `https://github.com/juanquiros/ml-cauce-naive-bayes.git`.
-- Usá ramas adecuadas, commits lógicos y descriptivos. No hagas force push ni
+- Usá nombres simples de ramas, como `sprint-0` y `sprint-1`, sin prefijos ni
+  atribuciones a herramientas en el proyecto. Usá commits lógicos y descriptivos. No hagas force push ni
   sobrescribas trabajo ajeno. Publicá sólo cuando haya autorización y acceso;
   informá el resultado real, los SHA y cualquier limitación.
 - Preservá los datasets originales, los tests del docente y `conftest.py`.

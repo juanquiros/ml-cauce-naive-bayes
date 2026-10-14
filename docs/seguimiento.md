@@ -110,7 +110,8 @@ documentados, no resultados inventados ni bloqueos de toda la implementación.
 | 14/10/2026 | S1 pasos 1–6; S2 pasos 7–12; S3 pasos 13–20. | Dependencias y organización solicitada. |
 | 14/10/2026 | Recuperación CSV y auditoría como scripts mínimos. | Reproducibilidad sin publicar textos/identificadores ni alterar docentes. |
 | 14/10/2026 | Preservar bytes originales con .gitattributes. | core.autocrlf=true; hashes idénticos también en los blobs de Git. |
-| 14/10/2026 | Crear main con el commit de materiales y desarrollar documentación en codex/sprint-0. | Remoto vacío con main como rama predeterminada; permite revisar S0 mediante pull request sin reescribir historia. |
+| 14/10/2026 | Usar nombres de rama simples: sprint-0, sprint-1 y siguientes. | Preferencia explícita del usuario; sin prefijos ni atribuciones a herramientas. |
+| 14/10/2026 | Crear main con el commit de materiales y desarrollar documentación en sprint-0. | Remoto vacío con main como rama predeterminada; permite revisar S0 mediante pull request sin reescribir historia. |
 
 ## Registro de commits importantes y publicación
 
@@ -120,14 +121,17 @@ documentados, no resultados inventados ni bloqueos de toda la implementación.
 | Documentar el Sprint 0 y agregar auditorías reproducibles | `85ba68cb178d7ae016004089934b9cdf198adeda` | Cinco documentos obligatorios, inventario técnico, README, evidencia y scripts auxiliares. |
 | Registrar el cierre verificado y la publicación del Sprint 0 | Consultar `git log -1 --format=%H -- docs/seguimiento.md` | Este cierre: checklist final y publicación comprobada. Su SHA completo se informa en el reporte de entrega. |
 
-Rama de trabajo: `codex/sprint-0`, con seguimiento de `origin/codex/sprint-0`.
+Rama de trabajo: `sprint-0`, con seguimiento de `origin/sprint-0`.
 `main` contiene la base de materiales originales. Origin apunta al repositorio
-solicitado. El comando `git push -u origin main codex/sprint-0` finalizó con
-salida 0 y creó ambas ramas; `git ls-remote origin` confirmó sus SHA. El commit
-de cierre se publica en la misma rama mediante un push adicional, sin force push.
+solicitado. La base se publicó en main y los cambios del Sprint 0 en su rama.
+La rama actual se publica con `git push -u origin sprint-0`, sin force push.
+Su nombre se ajustó a la preferencia del usuario y se eliminó la rama anterior.
 
-Pull request abierto contra main:
-[Preparar el Sprint 0 del proyecto académico Cauce](https://github.com/juanquiros/ml-cauce-naive-bayes/pull/1).
+Pull request actual abierto como borrador contra main:
+[Preparar el Sprint 0 del proyecto académico Cauce](https://github.com/juanquiros/ml-cauce-naive-bayes/pull/2).
+Se mantiene como borrador para evitar comentarios de revisión automática con
+atribuciones a herramientas. El PR anterior quedó cerrado y se quitó su comentario
+automático. GitHub conserva el historial del PR cerrado y de los commits anteriores.
 No se fusionó el PR. El árbol quedó limpio tras los commits y no hay CSV,
 entornos virtuales ni temporales versionados. El SHA final y su coincidencia
 con el remoto se verifican después del último push y se informan en la entrega.
