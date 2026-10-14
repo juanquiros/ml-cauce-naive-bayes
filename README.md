@@ -1,5 +1,10 @@
 # Cauce - Clasificación de mensajes
 
+## Integrantes
+
+- Andruszyszyn Emanuel
+- Quirós Juan
+
 ## Descripción
 
 Cauce es una billetera virtual que recibe unos 6.500 mensajes diarios. Nueve personas los leen y los derivan a distintos equipos. Los errores de derivación demoran la atención, especialmente cuando hay sospechas de fraude.
@@ -10,9 +15,9 @@ Predecir `equipo_final` a partir del texto del mensaje. La decisión de derivaci
 
 ## Algoritmos
 
-Implementamos Naive Bayes multinomial desde cero con NumPy. Las pruebas comprueban sus cálculos contra `MultinomialNB` de scikit-learn. Después lo compararemos con KNN usando TF-IDF y distancia coseno.
+Implementamos Naive Bayes multinomial desde cero con NumPy y comprobamos que sus predicciones coinciden con `MultinomialNB` de scikit-learn. Lo comparamos con KNN usando TF-IDF y distancia coseno, con ajuste de parámetros mediante validación cruzada.
 
-Los pasos 1 al 6 del notebook están resueltos: exploración, línea base manual, duplicados, limpieza, preparación de textos y una demostración de Naive Bayes con ejemplos inventados. Los pasos 7 al 20 siguen pendientes; el modelo todavía no se entrenó con el histórico de Cauce.
+Los pasos 1 al 12 del notebook están resueltos y ejecutados: preparación de datos, entrenamiento, equivalencia de Naive Bayes, términos indicativos, ajuste de ambos modelos y comparación de tiempos. Los pasos 13 al 20 siguen pendientes: derivación, umbrales, evaluación final e informe. El conjunto de prueba se mantiene reservado para esa evaluación, salvo la comprobación de equivalencia del paso 8.
 
 ## Datos
 
@@ -44,6 +49,8 @@ En otra terminal, desde la raíz:
 ```
 
 En Linux o macOS, usá `.venv/bin/python` en lugar de `.venv\Scripts\python.exe`. Abrí JupyterLab desde `caso1_cauce/` para que funcionen las rutas relativas del notebook.
+
+Por ahora, ejecutá las celdas desde el inicio hasta el paso 12. Las búsquedas usan cinco particiones estratificadas, semilla 42 y grillas de 16 combinaciones para Naive Bayes y 12 para KNN. Los tiempos se calculan con tres repeticiones y pueden variar según el equipo y la carga de ejecución.
 
 Las 15 pruebas de limpieza y las 12 de Naive Bayes aprueban. Las cuatro de derivación siguen fallando con `NotImplementedError` porque ese módulo está pendiente.
 

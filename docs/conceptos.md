@@ -79,7 +79,7 @@ $$
 
 `j` recorre las clases y `m` es el puntaje máximo del mensaje. La resta del máximo estabiliza la suma de exponenciales, que calcula `log_suma_exp`. Finalmente, `P(c | x)` se obtiene aplicando la exponencial al logaritmo normalizado.
 
-Para interpretar el modelo, `terminos_mas_indicativos` compara el logaritmo de la probabilidad de cada término en una clase con su promedio en las otras. Esto destaca palabras que diferencian equipos, no simplemente las palabras más frecuentes. La función está implementada; su aplicación al histórico queda para el paso 9.
+Para interpretar el modelo, `terminos_mas_indicativos` compara el logaritmo de la probabilidad de cada término en una clase con su promedio en las otras. Esto destaca palabras que diferencian equipos, no simplemente las palabras más frecuentes. En el paso 9 se aplica al modelo entrenado con la porción de entrenamiento del histórico.
 
 ## Representación del texto y KNN
 
@@ -99,13 +99,17 @@ $$
 d_{\cos}(u,v)=1-\frac{u\cdot v}{\lVert u\rVert\lVert v\rVert}.
 $$
 
-`u` y `v` son vectores no nulos de dos mensajes; el punto indica producto escalar y las barras, su norma. Mensajes que comparten términos relevantes pueden ser cercanos aunque difieran en longitud. Con vectores normalizados, euclídea y coseno pueden ordenar igual a los vecinos; la consigna pide coseno y búsqueda `brute`. KNN conserva el entrenamiento y compara contra él al predecir, por lo que se evaluarán su tiempo y su costo de memoria.
+`u` y `v` son vectores no nulos de dos mensajes; el punto indica producto escalar y las barras, su norma. La fracción es la similitud del coseno: en estos vectores de términos no negativos, un valor cercano a uno indica orientaciones parecidas. La distancia es uno menos esa similitud. Mensajes que comparten términos relevantes pueden ser cercanos aunque difieran en longitud. Con vectores normalizados, euclídea y coseno pueden ordenar igual a los vecinos; la consigna pide coseno y búsqueda `brute`. KNN conserva el entrenamiento y compara contra él al predecir, por lo que medimos su tiempo en el paso 12.
 
 ## Separación, validación y métricas
 
-**Entrenamiento y prueba.** Separamos datos para evaluar con ejemplos que el modelo no aprendió. La consigna fija 80% para entrenamiento y 20% para prueba, con estratificación por clase y semilla 42. Quitaremos duplicados antes de dividir para evitar que la misma copia aparezca en ambos conjuntos.
+**Entrenamiento y prueba.** Separamos datos para evaluar con ejemplos que el modelo no aprendió. La consigna fija 80% para entrenamiento y 20% para prueba, con estratificación por clase y semilla 42. Quitamos duplicados antes de dividir para evitar que la misma copia aparezca en ambos conjuntos.
 
-**Validación cruzada.** Divide el entrenamiento en particiones: se ajusta con algunas y se valida con la restante, repitiendo el proceso. En Cauce serán cinco particiones estratificadas para ajustar parámetros con F1 macro. El pipeline vuelve a aprender vocabulario e IDF dentro de cada partición, sin usar información de su validación. Las probabilidades fuera de muestra permitirán elegir umbrales sin consultar prueba.
+**Validación cruzada.** Divide el entrenamiento en particiones: se ajusta con algunas y se valida con la restante, repitiendo el proceso. En Cauce usamos cinco particiones estratificadas para ajustar parámetros con F1 macro. El pipeline vuelve a aprender vocabulario e IDF dentro de cada partición, sin usar información de su validación. Las probabilidades fuera de muestra permitirán elegir umbrales sin consultar prueba.
+
+**Hiperparámetros.** Son decisiones que fijamos antes de entrenar, a diferencia de los conteos o las probabilidades que el modelo aprende. En Cauce probamos `alpha` (suavizado), `ngram_range` (palabras individuales o también pares consecutivos) y `min_df` (mínimo de documentos que contienen un término) para Naive Bayes. Para KNN probamos `n_neighbors` (cantidad de vecinos), `weights` (votos iguales o ponderados por distancia) y `ngram_range`.
+
+**GridSearchCV.** Entrena y valida cada combinación de una grilla de hiperparámetros, y compara sus promedios de validación. Con `scoring="f1_macro"` elige la combinación con mayor F1 macro promedio; `best_estimator_` conserva el pipeline reajustado con todo el entrenamiento. Usamos las mismas cinco particiones para ambos modelos y mantenemos el vectorizador dentro del pipeline. Un buen promedio de validación ayuda a elegir parámetros, pero no reemplaza la evaluación final en prueba.
 
 **Matriz de confusión.** Cuenta las combinaciones de clase real y clase predicha. Usaremos filas reales y columnas predichas: la diagonal contiene los aciertos. Normalizar por fila permite ver qué porcentaje de cada equipo se confunde con los demás, especialmente cuánto fraude termina en tarjeta o transferencias.
 

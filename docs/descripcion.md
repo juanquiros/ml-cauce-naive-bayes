@@ -39,7 +39,7 @@ La distribución no es uniforme: fraude tiene menos ejemplos que transferencias.
 | `email` | 1.163 | 310 |
 | `formulario_web` | 862 | 212 |
 
-En una copia de trabajo quitamos los 200 duplicados del histórico, conservando el primero, y quedaron 8.000 mensajes. Luego calculamos `texto_limpio`: 7.952 textos no están vacíos y 70 mensajes tienen menos de dos palabras. Esos 70 se reservan para revisión humana: 48 quedaron vacíos y 22 contienen una sola palabra. Los otros 7.930 son aptos para entrenamiento. Las copias conservan los índices e identificadores originales y todavía no se dividieron en entrenamiento y prueba.
+En una copia de trabajo quitamos los 200 duplicados del histórico, conservando el primero, y quedaron 8.000 mensajes. Luego calculamos `texto_limpio`: 7.952 textos no están vacíos y 70 mensajes tienen menos de dos palabras. Esos 70 se reservan para revisión humana: 48 quedaron vacíos y 22 contienen una sola palabra. Los otros 7.930 se dividieron de forma estratificada en 6.344 mensajes de entrenamiento y 1.586 de prueba, con semilla 42. Las copias conservan los índices e identificadores originales.
 
 Los CSV originales siguen intactos. Las 2.040 filas nuevas deberán conservarse para la entrega, incluso si hay duplicados o mensajes que requieran revisión; todavía no se clasificaron.
 
@@ -53,11 +53,17 @@ Comparando `equipo_derivado` con `equipo_final` en las 8.200 filas originales:
 - 290 de los 914 mensajes de fraude llegaron a otro sector: **31,73% del fraude real**.
 - 256 mensajes de otros sectores fueron enviados a fraude.
 
-Estos números describen la mesa de entrada; todavía no hay resultados de modelos entrenados con el histórico. La referencia del escenario, aproximadamente un error cada seis mensajes, es coherente con esta muestra, pero no reemplaza la medición.
+Estos números describen la mesa de entrada sobre los datos originales. La referencia del escenario, aproximadamente un error cada seis mensajes, es coherente con esta muestra, pero no reemplaza la medición ni se confunde con la validación de los modelos.
 
 ## Cómo vamos a resolverlo y evaluarlo
 
-Naive Bayes multinomial permite aprender relaciones entre palabras y equipos mediante conteos. Su entrenamiento y su predicción son sencillos y rápidos. KNN servirá para comparar esa forma de clasificar con la búsqueda de mensajes históricos parecidos, usando TF-IDF y coseno.
+Naive Bayes multinomial permite aprender relaciones entre palabras y equipos mediante conteos. KNN compara esa forma de clasificar con la búsqueda de mensajes históricos parecidos, usando TF-IDF y coseno.
+
+Con CountVectorizer y `alpha=1`, Naive Bayes propio y scikit-learn coincidieron en las 1.586 predicciones del paso 8. Esa coincidencia verifica la implementación y no significa 100% de exactitud frente a las etiquetas reales.
+
+En cinco particiones estratificadas del entrenamiento, Naive Bayes obtuvo F1 macro promedio de **0,935575** con `alpha=0.1`, `ngram_range=(1,2)` y `min_df=2`. KNN obtuvo **0,928744** con nueve vecinos, `weights="distance"` y `ngram_range=(1,2)`. Son resultados de validación cruzada: no se calcularon métricas finales en prueba ni se eligieron umbrales.
+
+El experimento de tiempos reserva 1.000 mensajes dentro de entrenamiento y ajusta ambos modelos con subconjuntos del resto. Naive Bayes fue más rápido en los cuatro tamaños; su tiempo se mantuvo aproximadamente estable, mientras que el de KNN creció con más mensajes almacenados. La tabla y el gráfico del paso 12 contienen las mediciones de los pipelines completos, promediadas sobre tres repeticiones. No representan un sistema en producción ni una proyección diaria.
 
 Vamos a comparar accuracy, precision, recall y F1 por clase, F1 macro y matrices de confusión. También se medirá el tiempo de predicción. La regla final agregará cobertura automática, exactitud entre los casos automáticos y fraude perdido: los fraudes enviados automáticamente a otro equipo. La revisión humana no cuenta como fraude perdido en esa definición.
 

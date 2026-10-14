@@ -1,6 +1,6 @@
 # Plan de trabajo
 
-La referencia principal es `caso1_cauce/caso1_cauce.ipynb`. Los pasos 1 al 6 están completos y ejecutados. Las funciones de limpieza y Naive Bayes aprueban las 27 pruebas originales de esos módulos. Los pasos 7 al 20 y las cuatro pruebas de derivación siguen pendientes.
+La referencia principal es `caso1_cauce/caso1_cauce.ipynb`. Los pasos 1 al 12 están completos y ejecutados desde el inicio. Las funciones de limpieza y Naive Bayes aprueban las 27 pruebas originales de esos módulos. Los pasos 13 al 20 y las cuatro pruebas de derivación siguen pendientes.
 
 ## Etapas y pasos del notebook
 
@@ -12,12 +12,12 @@ La referencia principal es `caso1_cauce/caso1_cauce.ipynb`. Los pasos 1 al 6 est
 | 2. Naive Bayes | 4 | **Completo.** Limpieza implementada, 15 pruebas aprobadas y cinco ejemplos inventados de texto original y limpio. |
 | 2. Naive Bayes | 5 | **Completo.** `texto_limpio`, máscaras de revisión y entrenamiento: 70 mensajes cortos y 7.930 aptos. |
 | 2. Naive Bayes | 6 | **Completo.** Naive Bayes, `log_suma_exp` y términos indicativos implementados; 12 pruebas aprobadas y demostración didáctica. |
-| 2. Naive Bayes | 7 | Dividir 80/20, estratificando por `equipo_final`, con `random_state=42`. |
-| 2. Naive Bayes | 8 | Entrenar CountVectorizer y ambos Naive Bayes con `alpha=1`; comprobar coincidencia de predicciones del 100% en prueba, como pide la consigna. |
-| 2. Naive Bayes | 9 | Obtener e interpretar los diez términos más indicativos de cada clase. |
-| 3. Comparación | 10 | Ajustar el pipeline CountVectorizer + Naive Bayes propio con GridSearchCV, cinco particiones estratificadas y `f1_macro`. Explicar cada hiperparámetro. |
-| 3. Comparación | 11 | Ajustar TF-IDF + `KNeighborsClassifier(metric="cosine", algorithm="brute")`; justificar coseno frente a euclídea. |
-| 3. Comparación | 12 | Medir y graficar el tiempo de predicción de 1.000 mensajes usando 25%, 50%, 75% y 100% del entrenamiento de cada modelo. |
+| 2. Naive Bayes | 7 | **Completo.** División estratificada 80/20 con semilla 42: 6.344 mensajes de entrenamiento y 1.586 de prueba. |
+| 2. Naive Bayes | 8 | **Completo.** CountVectorizer + ambos Naive Bayes con `alpha=1`: coincidencia del 100% y probabilidades numéricamente próximas. |
+| 2. Naive Bayes | 9 | **Completo.** Diez términos indicativos por clase, calculados con entrenamiento e interpretados. |
+| 3. Comparación | 10 | **Completo.** GridSearchCV de CountVectorizer + Naive Bayes: 16 combinaciones, cinco particiones estratificadas y F1 macro. |
+| 3. Comparación | 11 | **Completo.** GridSearchCV de TF-IDF + KNN con coseno y `brute`: 12 combinaciones y las mismas particiones. |
+| 3. Comparación | 12 | **Completo.** Tabla y gráfico de tiempos: lote fijo de 1.000 mensajes, cuatro tamaños y tres repeticiones de cada pipeline. |
 | 4. Resultados | 13 | Completar y probar `derivar` y `evaluar_derivacion`. |
 | 4. Resultados | 14 | Obtener probabilidades fuera de muestra con `cross_val_predict` en entrenamiento y elegir ambos umbrales con margen de seguridad, para cada modelo. |
 | 4. Resultados | 15 | Evaluar una sola vez en prueba: tabla de cinco indicadores para ambos modelos y mesa de entrada; reporte y matriz del modelo elegido. |
@@ -27,7 +27,7 @@ La referencia principal es `caso1_cauce/caso1_cauce.ipynb`. Los pasos 1 al 6 est
 | 4. Resultados | 19 | Generar y verificar `predicciones_caso1.csv`: 2.040 filas y columnas `id_mensaje`, `equipo_predicho`, `prob_max`, `prob_fraude`, `derivacion`. |
 | 4. Resultados | 20 | Preparar `informe_ejecutivo.pdf` para Laura Benítez. |
 
-El detalle de los seis primeros pasos está en el notebook. Los datos originales y los preparados se distinguen en `descripcion.md`. El próximo paso pendiente es la división estratificada 80/20 del paso 7.
+El detalle de los doce primeros pasos está en el notebook. Los datos originales, los preparados y los resultados de validación se distinguen en `descripcion.md`. El próximo paso pendiente es implementar la regla de derivación del paso 13.
 
 ## Código y qué exigen las pruebas
 
@@ -45,7 +45,9 @@ El vocabulario y el IDF se ajustarán sólo con entrenamiento. Durante la valida
 
 Los mensajes con menos de dos palabras limpias irán a revisión humana también al clasificar los nuevos. No se eliminarán filas de la salida final. No se usarán `equipo_derivado`, `equipo_final` ni identificadores como entradas del clasificador.
 
-Antes de cerrar el paso 15 hay que consultar al docente cuáles son los cinco indicadores de aceptación y sus metas: `evaluar_derivacion` especifica tres, y los materiales entregados no completan esa lista. También quedan por definir las grillas de parámetros y cómo expresar el margen de seguridad del paso 14; se decidirán con los resultados de validación y los criterios del caso.
+Las grillas de parámetros ya se evaluaron y sus mejores estimadores se conservan en memoria al ejecutar el notebook. La comparación de tiempos usa copias de esas configuraciones: reserva un lote fijo de 1.000 mensajes del entrenamiento y ajusta con 25%, 50%, 75% y 100% de los 5.344 restantes. Ese lote no entra al ajuste de los modelos medidos y prueba no se usa en el experimento.
+
+Antes de cerrar el paso 15 hay que consultar al docente cuáles son los cinco indicadores de aceptación y sus metas: `evaluar_derivacion` especifica tres, y los materiales entregados no completan esa lista. También queda por definir cómo expresar el margen de seguridad del paso 14, usando los resultados de validación y los criterios del caso.
 
 Los entregables explícitos son el notebook resuelto, los módulos completos con sus pruebas aprobadas, `predicciones_caso1.csv` e `informe_ejecutivo.pdf`. El notebook debe incluir las tablas, gráficos y explicaciones de sus pasos y entregarse después de reiniciar y ejecutar todo. No aparece una rúbrica con puntajes en los materiales disponibles.
 
