@@ -20,7 +20,23 @@ def derivar(proba, clases, umbral_fraude, umbral_confianza):
 
     Devuelve un array de n_mensajes strings.
     """
-    raise NotImplementedError("Completar derivar")
+    proba = np.asarray(proba, dtype=float)
+    clases = np.asarray(clases)
+    if proba.ndim != 2 or clases.ndim != 1 or proba.shape[1] != len(clases):
+        raise ValueError("Las columnas de proba deben coincidir con las clases.")
+    posiciones_fraude = np.flatnonzero(clases == "fraude")
+    if len(posiciones_fraude) != 1:
+        raise ValueError("Debe haber una única clase fraude.")
+    if not np.isfinite(proba).all() or ((proba < 0) | (proba > 1)).any():
+        raise ValueError("Las probabilidades deben ser finitas y estar entre 0 y 1.")
+
+    posible_fraude = proba[:, posiciones_fraude[0]] >= umbral_fraude
+    confiables = (~posible_fraude) & (proba.max(axis=1) >= umbral_confianza)
+    # object permite conservar revision_humana y nombres de clases de distinta longitud.
+    destino = np.full(proba.shape[0], REVISION, dtype=object)
+    destino[posible_fraude] = "fraude"
+    destino[confiables] = clases[proba[confiables].argmax(axis=1)]
+    return destino
 
 
 def evaluar_derivacion(y_real, destino):
@@ -32,5 +48,18 @@ def evaluar_derivacion(y_real, destino):
       a un equipo que no es "fraude". Los enviados a revisión humana no cuentan como perdidos.
 
     Los tres valores son proporciones entre 0 y 1 (float).
+    Si un indicador no tiene denominador, devuelve np.nan: no hay una proporción observada.
     """
-    raise NotImplementedError("Completar evaluar_derivacion")
+    y_real = np.asarray(y_real)
+    destino = np.asarray(destino)
+    if y_real.ndim != 1 or destino.ndim != 1 or y_real.shape != destino.shape:
+        raise ValueError("Debe haber un destino por cada etiqueta real.")
+    automaticos = destino != REVISION
+    fraudes = y_real == "fraude"
+    perdidos = fraudes & automaticos & (destino != "fraude")
+    return {
+        "cobertura": float(automaticos.mean()) if len(destino) else float("nan"),
+        "exactitud_automatica": float((destino[automaticos] == y_real[automaticos]).mean())
+        if automaticos.any() else float("nan"),
+        "fraude_perdido": float(perdidos.sum() / fraudes.sum()) if fraudes.any() else float("nan"),
+    }
