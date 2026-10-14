@@ -67,9 +67,24 @@ El experimento de tiempos reserva 1.000 mensajes dentro de entrenamiento y ajust
 
 ## Umbrales y evaluación final
 
-Los materiales no completan la lista de cinco indicadores oficiales ni fijan sus metas o el margen de seguridad. Usamos un criterio provisional propio: mejorar exactitud automática y fraude perdido respecto de la mesa en cada partición OOF, conservar la mejora con umbrales vecinos y maximizar cobertura entre esos puntos estables. La selección independiente dio fraude `0.10` y confianza `0.60` para ambos modelos.
+Los materiales no completan la lista de cinco indicadores oficiales ni fijan sus metas o el margen de seguridad. En Sprint 3 usamos un criterio provisional: mejorar exactitud automática y fraude perdido respecto de la mesa en cada partición OOF, conservar la mejora con umbrales vecinos y maximizar cobertura entre esos puntos. Conservamos fraude `0.10` y confianza `0.60` para ambos modelos, sin repetir búsquedas ni cambiar los hiperparámetros del Sprint 2.
 
-En OOF, Naive Bayes obtuvo 99,48% de cobertura, 94,36% de exactitud automática y 6,93% de fraude perdido; KNN obtuvo 96,83%, 91,97% y 3,82%, respectivamente. Después de fijar las decisiones, evaluamos una vez sobre los mismos **1.586 mensajes aptos**. Los 70 mensajes cortos no integran esta prueba.
+La revisión usa las consecuencias OOF sobre 6.344 mensajes de entrenamiento, incluidos 707 fraudes reales y 5.637 no fraudes:
+
+| Indicador OOF | Naive Bayes | KNN |
+| --- | ---: | ---: |
+| Fraudes mal derivados | 49 | 27 |
+| Falsas alertas de fraude | 88 | 340 |
+| Otros errores automáticos | 219 | 126 |
+| Errores automáticos totales | 356 | 493 |
+| Revisiones humanas | 33 | 201 |
+| Cobertura | 99,48% | 96,83% |
+| Exactitud automática | 94,36% | 91,97% |
+| Fraude perdido | 6,93% | 3,82% |
+
+Recomendamos provisionalmente **Naive Bayes** bajo el supuesto de reducir errores generales y carga operativa (escenario B): menos alertas falsas y revisiones, mayor exactitud automática y menor tiempo de predicción. Si evitar fraudes mal derivados es la prioridad dominante (A), se favorece KNN. Para equilibrar riesgo y capacidad (C), el responsable de Cauce debe confirmar prioridades y costos relativos; no inventamos costos monetarios ni afirmamos un ganador único.
+
+La prueba vuelve a describirse sobre los mismos **1.586 mensajes aptos**, incluidos 176 fraudes reales y 1.410 no fraudes. Los 70 cortos no integran esta muestra:
 
 | Método | Accuracy | F1 macro | Cobertura | Exactitud de derivación | Fraude perdido |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -77,21 +92,40 @@ En OOF, Naive Bayes obtuvo 99,48% de cobertura, 94,36% de exactitud automática 
 | Naive Bayes | 93,88% | 0,9346 | 99,50% | 94,17% | 5,11% |
 | KNN | 92,81% | 0,9260 | 96,15% | 92,66% | 3,41% |
 
-Accuracy y F1 describen el clasificador directo; los otros indicadores describen destinos después de los umbrales. Para la mesa, se comparan decisiones manuales ya realizadas. Fraude perdido cuenta sólo fraudes enviados automáticamente a otro sector: revisión humana queda fuera del numerador.
+| Consecuencia en prueba | Naive Bayes | KNN | KNN menos NB |
+| --- | ---: | ---: | ---: |
+| Fraudes mal derivados | 9 | 6 | −3 |
+| Falsas alertas de fraude | 16 | 75 | +59 |
+| Otros errores automáticos | 67 | 31 | −36 |
+| Errores automáticos totales | 92 | 112 | +20 |
+| Revisiones humanas | 8 | 61 | +53 |
 
-Elegimos **KNN** priorizando fraude: perdió 6 de 176 fraudes, frente a 9 de Naive Bayes y 59 de la mesa. Su clasificador tuvo recall de fraude de 85,80% y precision de 94,97%. La regla recuperó otros casos, pero envió 75 mensajes no fraudulentos a Fraude. Naive Bayes ofreció mayor exactitud, cobertura y velocidad; la decisión implica ese costo, no una superioridad general de KNN.
+Accuracy y F1 macro describen la clase predicha. Cobertura divide por todos los mensajes; exactitud, por los destinos automáticos; fraude perdido, por los fraudes reales. Revisión no cuenta como pérdida. Las falsas alertas dividen por no fraudes: 1,13% para NB y 5,32% para KNN. Revisión divide por todos: 0,50% y 3,85%. La cobertura manual significa decisiones ya realizadas, no automatización.
 
-Analizamos diez de los 112 errores automáticos. Aparecieron consultas con varias intenciones, falta de contexto y vocabulario compartido. Un caso etiquetado como préstamos describe acceso sin autorización: se señala como posible inconsistencia a revisar, sin modificar la referencia.
+KNN evita tres fraudes perdidos adicionales, pero agrega carga de alertas y revisión. Sus otros errores automáticos son menos; por eso una comparación de costos debe separar categorías. La sensibilidad hipotética en OOF usa `ΔC = −22*c_fraude + 252*c_alerta − 93*c_otro + 168*c_revision`: KNN se favorece con resultado negativo, NB con positivo. Cada costo corresponde a una categoría distinta; no se suma nuevamente el total de errores.
+
+En Sprint 3 se consultó esta prueba para elegir KNN. La revisión reconoce ese antecedente: la recomendación actual no constituye una confirmación independiente de prueba. OOF también reutiliza datos que participaron en selección de parámetros y umbrales, y puede resultar optimista. No cambiamos decisiones técnicas para mejorar prueba ni creamos otra división como supuesta muestra independiente; se necesitan datos etiquetados nuevos.
+
+Analizamos diez de los 92 errores automáticos de Naive Bayes. Hay consultas con varias intenciones y pedidos sin contexto, incluido un fraude cuyo texto no explica el problema. Un caso etiquetado como préstamos denuncia acceso sin permiso: se señala como posible inconsistencia a revisar, sin modificar la referencia. Las descripciones están anonimizadas.
 
 ## Proyección diaria y mensajes nuevos
 
-La proyección sobre 6.500 mensajes usa la fracción de cortos `70/8000`: estima unos **6.195 destinos automáticos y 305 revisiones**, incluidas 57 por textos cortos. Se esperan unos 5.740 automáticos correctos y 455 incorrectos; unos 24 fraudes llegarían a otro equipo. La referencia manual sobre la misma fracción apta estima 1.060 derivaciones incorrectas y 240 fraudes mal derivados. No estimamos el resultado de atención de los cortos ni de la revisión.
+Para 6.500 mensajes usamos la fracción de cortos `70/8000`: 56,9 revisiones por textos cortos y 6.443,1 mensajes aptos. Aplicamos las proporciones de prueba sólo a los aptos:
 
-Son valores esperados si la distribución futura se parece a la muestra; no describen un día medido ni resultados de validación cruzada. Los denominadores y cálculos están en el paso 17.
+| Cantidad esperada por día | Naive Bayes | KNN |
+| --- | ---: | ---: |
+| Destinos automáticos | 6.410,6 | 6.195,3 |
+| Automáticos correctos | 6.036,9 | 5.740,3 |
+| Automáticos incorrectos | 373,8 | 455,0 |
+| Fraudes enviados a otro equipo | 36,6 | 24,4 |
+| Falsas alertas de fraude | 65,0 | 304,7 |
+| Revisión humana total, incluyendo cortos | 89,4 | 304,7 |
 
-Reentrenamos KNN con los **7.930 históricos aptos**, sin cambiar parámetros ni umbrales. Los 2.040 mensajes nuevos produjeron **1.957 destinos automáticos y 83 revisiones**, incluidas 15 por textos cortos. Sin etiquetas finales no podemos medir su exactitud. El CSV validado conserva filas e identificadores originales y queda local; el PDF contiene sólo agregados.
+La referencia manual sobre la misma fracción apta estima 1.060,3 derivaciones incorrectas y 239,7 fraudes mal derivados. No estimamos el resultado de la atención de los cortos ni de las revisiones. Las cantidades son expectativas si la distribución futura se parece a la muestra, no un día medido ni resultados OOF. Fraude perdido y alertas falsas ya están incluidos en errores automáticos.
 
-Los criterios oficiales siguen pendientes de confirmación. La elección provisional y el análisis de sensibilidad no demuestran aptitud para producción; también falta verificar capacidad de revisión, costo de avisos falsos y calidad de anotación.
+Reentrenamos Naive Bayes con los **7.930 históricos aptos**, `alpha=0.1`, unigramas y bigramas, `min_df=2` y los umbrales conservados. Los 2.040 mensajes nuevos produjeron **2.007 destinos automáticos y 33 revisiones**, incluidas 15 por textos cortos. No tienen etiquetas finales para medir exactitud. El CSV validado conserva filas, identificadores y orden originales y queda local; antes de regenerarlo se respaldó el resultado anterior de KNN fuera del repositorio público. El PDF contiene sólo agregados.
+
+Los criterios oficiales siguen pendientes de confirmación. También deben acordarse riesgo tolerable, costos relativos, capacidad de revisión y calidad de anotación. La recomendación provisional no demuestra aptitud para producción.
 
 ## Privacidad
 

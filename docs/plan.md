@@ -1,6 +1,6 @@
 # Plan de trabajo
 
-La referencia principal es `caso1_cauce/caso1_cauce.ipynb`. Los 20 pasos están completos y el notebook se ejecutó desde cero, sin errores. Las siete preguntas tienen sus respuestas y las 31 pruebas originales aprueban. Los umbrales y la recomendación son provisionales porque faltan los criterios oficiales de aceptación.
+La referencia principal es `caso1_cauce/caso1_cauce.ipynb`. Los 20 pasos están completos y el notebook se ejecutó desde cero, sin errores. Las siete preguntas tienen sus respuestas y las 31 pruebas originales aprueban. La revisión final compara costos OOF y recomienda provisionalmente Naive Bayes para reducir carga operativa, conservando parámetros y umbrales. Faltan los criterios oficiales y una confirmación con datos etiquetados nuevos.
 
 ## Etapas y pasos del notebook
 
@@ -15,17 +15,17 @@ La referencia principal es `caso1_cauce/caso1_cauce.ipynb`. Los 20 pasos están 
 | 2. Naive Bayes | 7 | **Completo.** División estratificada 80/20 con semilla 42: 6.344 mensajes de entrenamiento y 1.586 de prueba. |
 | 2. Naive Bayes | 8 | **Completo.** CountVectorizer + ambos Naive Bayes con `alpha=1`: coincidencia del 100% y probabilidades numéricamente próximas. |
 | 2. Naive Bayes | 9 | **Completo.** Diez términos indicativos por clase, calculados con entrenamiento e interpretados. |
-| 3. Comparación | 10 | **Completo.** GridSearchCV de CountVectorizer + Naive Bayes: 16 combinaciones, cinco particiones estratificadas y F1 macro. |
-| 3. Comparación | 11 | **Completo.** GridSearchCV de TF-IDF + KNN con coseno y `brute`: 12 combinaciones y las mismas particiones. |
+| 3. Comparación | 10 | **Completo.** GridSearchCV de CountVectorizer + Naive Bayes: 16 combinaciones, cinco particiones y F1 macro. Se conservan el código y las tablas del Sprint 2; la revisión ajusta sólo la configuración congelada. |
+| 3. Comparación | 11 | **Completo.** GridSearchCV de TF-IDF + KNN con coseno y `brute`: 12 combinaciones y las mismas particiones. Resultados registrados y configuración congelada, sin repetir la búsqueda. |
 | 3. Comparación | 12 | **Completo.** Tabla y gráfico de tiempos: lote fijo de 1.000 mensajes, cuatro tamaños y tres repeticiones de cada pipeline. |
 | 4. Resultados | 13 | **Completo.** Derivación con prioridad de fraude y evaluación con denominadores definidos; cuatro pruebas aprobadas. |
-| 4. Resultados | 14 | **Completo.** OOF de ambos pipelines, 56 pares por modelo y análisis de sensibilidad; umbrales provisionales fijados antes de prueba. |
-| 4. Resultados | 15 | **Completo.** Evaluación única de los tres métodos sobre 1.586 mensajes, cinco indicadores descriptivos, reporte y matriz de KNN. |
+| 4. Resultados | 14 | **Completo.** Umbrales del Sprint 3 conservados; costos OOF comparados, categorías sin superposición y escenarios A, B y C. Elección provisional bajo B, sin nuevas búsquedas. |
+| 4. Resultados | 15 | **Completo.** Resultados descriptivos de los tres métodos sobre 1.586 mensajes; tabla ampliada, reporte y matriz de Naive Bayes. Se reconoce la consulta previa de prueba para elegir modelo. |
 | 4. Resultados | 16 | **Completo.** Diez errores automáticos reales, descripciones anonimizadas, posibles causas y mejoras propuestas. |
-| 4. Resultados | 17 | **Completo.** Proyección sobre 6.500 mensajes, separando cortos y aptos, con comparación manual sobre la misma fracción apta. |
-| 4. Resultados | 18 | **Completo.** KNN reajustado con 7.930 históricos aptos y aplicado a los mensajes nuevos; cortos forzados a revisión. |
+| 4. Resultados | 17 | **Completo.** Proyección de ambos modelos sobre 6.500 mensajes, incluidas falsas alertas y revisión; cortos y aptos separados, y referencia manual sobre la misma fracción apta. |
+| 4. Resultados | 18 | **Completo.** Naive Bayes reajustado con 7.930 históricos aptos y aplicado a los mensajes nuevos; cortos forzados a revisión. |
 | 4. Resultados | 19 | **Completo.** CSV UTF-8 local validado: 2.040 filas y las cinco columnas exigidas, sin agregar índice ni quitar duplicados nuevos. |
-| 4. Resultados | 20 | **Completo.** Informe ejecutivo de tres páginas A4 para Laura Benítez, generado con agregados y revisado visualmente. |
+| 4. Resultados | 20 | **Completo.** Informe ejecutivo de tres páginas A4 para Laura Benítez, con comparación OOF, costos, recomendación y proyección actualizadas; todas las páginas revisadas visualmente. |
 
 El detalle de todos los pasos está en el notebook. `descripcion.md` distingue datos originales, validación, evaluación final y proyección. El desarrollo funcional está cerrado; los criterios pendientes limitan la aprobación para una implementación real.
 

@@ -165,3 +165,7 @@ La evaluación de la regla distingue:
 El recall del clasificador y el fraude perdido de la regla tienen definiciones distintas. Un mensaje enviado a revisión no queda reconocido automáticamente como fraude, pero tampoco se considera perdido según el contrato de `evaluar_derivacion`.
 
 Si un indicador no tiene denominador, `evaluar_derivacion` devuelve NaN: no hay una proporción observada. Por ejemplo, sin mensajes automáticos la cobertura puede ser cero, pero la exactitud automática no está definida. Sin fraudes reales, el fraude perdido tampoco está definido. En un conjunto vacío, los tres indicadores quedan no disponibles.
+
+**Costos de derivación.** Una falsa alerta es un mensaje no fraudulento enviado a Fraude; su tasa divide por los no fraudes. Una revisión requiere intervención humana; su tasa divide por todos los mensajes. Para comparar costos relativos sin contar errores dos veces, separamos fraude perdido, falsas alertas, otros errores automáticos y revisiones. El total de errores automáticos ya incluye las tres primeras categorías. Cada una puede tener un costo distinto y no conocemos los valores económicos de Cauce.
+
+**Límite de la selección.** OOF evita ajustar cada predicción con su propio ejemplo, pero reutilizar esas particiones para elegir parámetros o umbrales puede favorecer sus métricas. Además, si prueba ya se consultó para elegir el modelo, una revisión sobre esa misma prueba no es independiente. Confirmar la recomendación requiere nuevos mensajes etiquetados; no alcanza con volver a dividir los datos ya evaluados.
