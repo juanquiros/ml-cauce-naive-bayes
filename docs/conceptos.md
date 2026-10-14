@@ -1,198 +1,161 @@
-# Conceptos para desarrollar y defender Cauce
+# Conceptos para estudiar Cauce
 
-Esta guía reúne lo necesario para entender los datos, la implementación y la
-evaluación. Las fuentes principales son la guía de Naive Bayes de la Sesión 4,
-los contratos de `src/`, el notebook de Cauce, los capítulos entregados como
-`NB.pdf` y `knn.pdf`, las diapositivas M301 y el notebook docente de KNN.
-
-Las explicaciones de validación, métricas y prevención de fuga desarrollan los
-términos que pide el notebook; son apoyo pedagógico, no requisitos adicionales.
-Todos los mensajes y conteos usados como ejemplos aquí son **inventados para
-estudiar**. No reproducen mensajes del dataset ni resultados experimentales.
-Las preguntas de reflexión se registran en requisitos y se responderán en S3.
+Los ejemplos de esta guía son inventados. Sirven para entender los conceptos; no son resultados del dataset ni de modelos entrenados.
 
 ## Datos y aprendizaje
 
-| Concepto | Qué es y para qué sirve | Cómo funciona | Uso en Cauce |
-| --- | --- | --- | --- |
-| Machine Learning | Métodos que aprenden patrones a partir de ejemplos para resolver una tarea. Permiten evaluar una regla aprendida, en lugar de escribir cada caso a mano. | Se ajusta un modelo con datos y se comprueba su capacidad con otros datos. | Aprender asociaciones entre el texto y el equipo correcto. |
-| Aprendizaje supervisado | Aprendizaje con ejemplos cuya respuesta correcta se conoce. | Cada entrada X tiene una etiqueta y; el ajuste relaciona ambas. | Los mensajes históricos tienen `equipo_final`; los nuevos no. |
-| Clasificación de textos | Asignación de una categoría a un texto. | Se normaliza el mensaje, se convierte en números y se aplica un clasificador. | Un mensaje como «no puedo entrar a mi cuenta» recibe una de las cinco clases reales. |
-| Dataset | Conjunto organizado de observaciones. Sirve para entrenar o evaluar de manera consistente. | En un CSV, cada fila representa un mensaje y cada columna un campo. | Hay históricos etiquetados y nuevos sin etiqueta; no deben confundirse. |
-| Atributos o features | Información numérica que recibe el modelo. | En texto puede ser una columna por término, con conteos o pesos. | La palabra «tarjeta» puede ser una feature; `id_cliente` no debe incorporarse. |
-| Etiquetas o clases | Respuestas posibles que se quiere predecir. | Se toman de la variable objetivo y se conservan con nombres consistentes. | `cuenta_acceso`, `fraude`, `prestamos_inversiones`, `tarjeta` y `transferencias`. |
-| Entrenamiento | Proceso de construir el modelo a partir de ejemplos. | NB estima conteos y probabilidades; KNN conserva ejemplos vectorizados para compararlos luego. | Se usa sólo el subconjunto habilitado para entrenamiento y el texto limpio. |
-| Predicción | Aplicación del modelo ya ajustado a una entrada. | Se transforma el texto con el vocabulario aprendido y se calculan clases o probabilidades. | La clase más probable y el destino final pueden diferir por la regla de fraude/revisión. |
+**Machine Learning.** Es una forma de aprender patrones a partir de datos para predecir casos nuevos. En vez de escribir una regla para cada frase, usamos mensajes históricos para aprender qué palabras se relacionan con cada equipo de Cauce.
 
-`equipo_derivado` describe la decisión manual original; `equipo_final` describe
-el equipo que debía recibir el mensaje. La comparación entre ambos mide la línea
-base manual. El objetivo del modelo se toma de `equipo_final`, sin entregárselo
-como una columna de entrada.
+**Aprendizaje supervisado.** El entrenamiento utiliza ejemplos con una respuesta conocida. En Cauce tenemos el mensaje y `equipo_final`: el modelo compara los patrones de los textos con esas etiquetas para aprender a clasificarlos.
 
-## Bayes y el modelo multinomial
+**Clasificación.** Consiste en asignar una categoría entre varias posibles. Cauce tiene cinco equipos, así que es una clasificación multiclase. Por ejemplo, un mensaje sobre recuperar la contraseña podría corresponder a `cuenta_acceso`.
 
-**Naive Bayes** es una familia de clasificadores probabilísticos. Sirve para
-estimar qué clase explica mejor las características observadas. Combina una
-probabilidad previa de clase con las probabilidades de sus atributos. En Cauce
-se utilizará la variante multinomial para conteos de términos, implementada con
-NumPy según el módulo docente.
+**Dataset.** Es el conjunto de ejemplos con el que trabajamos. Cada fila representa un mensaje y las columnas contienen su texto y otros datos. Los históricos permiten aprender y evaluar; los nuevos se clasificarán una vez elegido el modelo.
 
-**Teorema de Bayes.** Permite relacionar dos probabilidades condicionales:
+**Variables, features y etiquetas.** Las variables son los campos disponibles. Las features son la representación que recibe el modelo, como los conteos de palabras; la etiqueta es la respuesta que queremos predecir. En Cauce, `texto` produce las features y `equipo_final` es la etiqueta. Un identificador distingue filas, pero no describe el contenido del reclamo.
 
-```text
-P(c | x) = P(x | c) · P(c) / P(x)
-```
+**Entrenamiento.** Es el ajuste del modelo con ejemplos etiquetados. Naive Bayes cuenta mensajes y términos por clase; KNN conserva las representaciones de los textos para buscar vecinos después. El vocabulario se aprende con los textos de entrenamiento.
 
-`P(c | x)` es la probabilidad posterior de una clase dado el mensaje; `P(x | c)`
-es la verosimilitud del mensaje dada la clase; `P(c)` es la probabilidad a priori;
-`P(x)` normaliza. Para elegir la clase alcanza comparar los numeradores, porque
-el denominador es común. En Cauce se normalizará además para obtener una fila
-de probabilidades que la regla de derivación pueda utilizar.
+**Predicción.** Aplica lo aprendido a un mensaje nuevo. El texto se limpia y se transforma con el vectorizador ya ajustado. El modelo devuelve una clase y probabilidades; la regla de derivación decide después si enviarlo a un equipo o a revisión humana.
 
-**Probabilidad a priori.** Resume la frecuencia de una clase antes de leer un
-mensaje. Se estima como `N_c / N`, cantidad de documentos de esa clase sobre el
-total de entrenamiento. Por ejemplo, 20 mensajes de fraude entre 100 darían 0,20;
-son números didácticos. En Cauce la clase guarda su logaritmo en `class_log_prior_`.
+## Probabilidades y Naive Bayes
 
-**Probabilidad condicional.** Mide la probabilidad de un evento al conocer otro.
-Sirve para distinguir qué términos son frecuentes dentro de cada clase. En el
-modelo multinomial se estima `P(término | clase)` a partir de los conteos de
-palabras, no de la cantidad de documentos que contienen la palabra. En Cauce
-se almacena en escala logarítmica en `feature_log_prob_`.
+**Probabilidad condicional.** Mide la probabilidad de un evento sabiendo que ocurrió otro:
 
-**Independencia condicional.** Es el supuesto de tratar los atributos como
-independientes cuando se conoce la clase. Permite descomponer un cálculo conjunto
-en factores sencillos. Para texto, el modelo usa las frecuencias de términos
-sin representar toda la estructura de una oración. En Cauce es una hipótesis de
-modelado que se debe evaluar con resultados; no una afirmación sobre el lenguaje.
+$$
+P(A\mid B)=\frac{P(A\cap B)}{P(B)},\qquad P(B)>0.
+$$
 
-**Naive Bayes multinomial.** Representa un documento mediante los conteos no
-negativos de sus términos. Sirve para clasificación textual con vocabularios
-grandes. Aprende por clase un vector de frecuencias suavizadas y, para predecir,
-combina las contribuciones de las palabras presentes. En Cauce se requiere:
+`A` y `B` son eventos, y `A ∩ B` significa que ocurren ambos. En Cauce, `P(t | c)` expresa la probabilidad de un término `t` dentro de una clase `c`. Que una palabra sea frecuente en fraude no significa, por sí solo, que todo mensaje con esa palabra sea fraude.
 
-```text
-N_c  = documentos de la clase c
-N_ct = suma de apariciones del término t en documentos de c
-V    = cantidad de términos del vocabulario
+**Teorema de Bayes.** Permite invertir la condición para calcular la probabilidad de una clase dado un mensaje:
 
-P(c)     = N_c / N
-P(t | c) = (N_ct + alpha) / (suma_t N_ct + alpha · V)
-J(x, c)  = log P(c) + suma_t x_t · log P(t | c)
-```
+$$
+P(c\mid x)=\frac{P(x\mid c)P(c)}{P(x)}.
+$$
 
-La guía también estudia atributos categóricos y gaussianos. Su denominador
-categórico es distinto del multinomial de texto. El archivo complementario
-`naive_bayes_desde_cero.py` ilustra esos otros tipos; no reemplaza la clase de Cauce.
+`c` es el equipo y `x` representa el mensaje. `P(c)` es la probabilidad a priori del equipo; `P(x | c)`, la verosimilitud del mensaje en ese equipo; `P(x)`, la evidencia común a todas las clases; y `P(c | x)`, la probabilidad a posteriori. Elegimos la clase con mayor posterior. Por ejemplo, combinamos cuán habitual es fraude con qué tan compatibles son las palabras del mensaje con esa clase.
 
-**Conteo de palabras.** Es la cantidad de apariciones de cada término en un
-documento. Sirve para representar mensajes con números. Con vocabulario
-`[cuenta, tarjeta]`, «tarjeta tarjeta cuenta» se representa como `[1, 2]`.
-En Cauce el orden de las columnas debe coincidir en entrenamiento y predicción.
+**Naive Bayes.** Es una familia de clasificadores que aplica Bayes con una simplificación de independencia condicional. Aprende probabilidades por clase y combina la información de las features. En Cauce usaremos la variante multinomial porque representamos textos mediante conteos de términos.
 
-**Suavizado de Laplace.** Agrega un pseudoconteo a cada término para estimar
-probabilidades con pocos datos. El suavizado aditivo usa `alpha`; con `alpha=1`
-se llama Laplace. La suma del denominador también aumenta para conservar la
-normalización. En Cauce se verifica alpha 1 y se comparan distintos valores en
-los tests y en una búsqueda futura. No se eligió todavía un alpha experimental.
+**Independencia condicional.** Supone que, conocida la clase, las observaciones de términos se pueden combinar como factores independientes. En texto es una aproximación: palabras como “no” y “reconozco” suelen aparecer relacionadas. Reduce la cantidad de probabilidades que hay que estimar, pero puede contar evidencia relacionada varias veces y dar probabilidades demasiado extremas. Por eso una confianza alta del modelo no garantiza que esté bien calibrado.
 
-**Logaritmos en probabilidades.** Permiten sustituir productos muy pequeños por
-sumas y evitar que la computadora los redondee a cero, problema llamado underflow.
-Sirven también para usar un producto matricial en todos los documentos/clases.
-En Cauce se calcula `J = X @ feature_log_prob_.T + class_log_prior_` y se normaliza:
+**Naive Bayes multinomial.** Modela los conteos de términos. Para cada clase aprende su frecuencia de documentos y la frecuencia de cada palabra. Si `N` es el total de documentos de entrenamiento y `N_c` la cantidad de la clase `c`:
 
-```text
-log_suma_exp(a) = m + log(suma exp(a - m)), con m = máximo de a
-log P(c | x)    = J(x, c) - log_suma_exp(J(x, :))
-P(c | x)        = exp(log P(c | x))
-```
+$$
+P(c)=\frac{N_c}{N}.
+$$
 
-El máximo y la suma se calculan por fila cuando `axis=1`; hay que cuidar las
-dimensiones al restar. Estas fórmulas son una explicación para estudiar la
-implementación pendiente, no código ya implementado.
+El conteo de documentos determina el prior; el conteo de palabras determina las probabilidades de términos. Son cantidades distintas. La representación no conserva el orden de las palabras, salvo la información que puedan aportar los n-gramas, como “no reconozco”.
 
-## Vectorización y comparación
+**Suavizado de Laplace.** Agrega una pequeña cantidad a los conteos para que un término del vocabulario no tenga probabilidad cero en una clase donde no apareció:
 
-| Concepto | Qué es y para qué sirve | Cómo funciona | Uso en Cauce |
-| --- | --- | --- | --- |
-| CountVectorizer | Transformador de scikit-learn que convierte textos en conteos. | `fit` aprende el vocabulario; `transform` cuenta términos y devuelve una matriz dispersa. Los términos fuera del vocabulario no agregan columnas. | Primer paso del pipeline NB. Se ajusta sólo con entrenamiento en cada fold. |
-| TF-IDF | Ponderación de términos según frecuencia local y rareza en el corpus. Reduce el peso relativo de términos ubicuos. | Combina TF, frecuencia del término, con IDF, frecuencia documental inversa. En scikit-learn hay suavizado y normalización configurables. | `TfidfVectorizer` representa mensajes para KNN. IDF también se aprende sólo de training. |
-| KNN | Clasificador que consulta los k ejemplos más cercanos. Sirve como comparación basada en semejanza. | Guarda ejemplos vectorizados, mide distancias al predecir y agrega sus votos; `weights` puede cambiar la ponderación. | Se usa `KNeighborsClassifier` de scikit-learn, sin implementación propia, con coseno y `brute`. |
-| Similitud del coseno | Medida del ángulo entre dos vectores; compara orientación. | `sim(x,z) = (x·z)/(norma(x)·norma(z))`; la distancia coseno es `1 - sim`. Hay que considerar vectores de norma cero. | Métrica exigida para KNN sobre TF-IDF; su comportamiento se justificará con el experimento. |
-| Pipeline | Secuencia que transforma entradas y aplica un estimador. Sirve para mantener juntas las etapas aprendidas. | Al entrenar, ajusta vectorizador y clasificador en orden; en predicción reutiliza las transformaciones. | Permite que GridSearchCV ajuste vocabulario dentro de cada fold. La clase propia debe ser clonable. |
-| Matriz dispersa | Representación que guarda principalmente valores distintos de cero. Ahorra memoria cuando el vocabulario es grande. | Almacena conteos y posiciones sin construir una tabla densa de todos los ceros. | NB debe aceptar la salida dispersa de CountVectorizer sin importar SciPy en su matemática ni convertir todo X a denso. |
+$$
+P(t\mid c)=\frac{n_{ct}+\alpha}{T_c+\alpha V}.
+$$
 
-Las diapositivas y el notebook de Iris muestran escalado numérico y otras
-distancias. Son contexto para entender KNN. La receta específica de Cauce exige
-TF-IDF y coseno; no exige trasladar `StandardScaler`, Iris ni Seaborn al proyecto.
+`n_ct` cuenta las apariciones del término `t` en los documentos de la clase `c`; `T_c` es el total de apariciones de todos los términos de esa clase; `V` es el tamaño del vocabulario; y `alpha` es el suavizado aditivo. Con `alpha=1` se llama Laplace. Como ejemplo, si “robaron” aparece 3 veces entre 20 términos de fraude y el vocabulario tiene 10 términos, su probabilidad suavizada es `(3+1)/(20+10)=4/30`.
 
-## Separar datos y elegir configuraciones
+Con `alpha=0`, un término conocido en el vocabulario pero no observado en una clase puede anular su verosimilitud. Una palabra totalmente fuera del vocabulario no crea una columna nueva al predecir: el vectorizador la ignora.
 
-**Separación de entrenamiento y prueba.** Reserva datos que no intervienen en
-decisiones de ajuste para estimar generalización. Se divide por índices y se
-mantiene la proporción de clases mediante estratificación. En Cauce corresponde
-80/20 con `random_state=42`, después de la deduplicación y tratamiento docente de
-textos cortos. Comparar resultados sobre training no sustituye evaluar en prueba.
+### Puntajes, logaritmos y normalización
 
-**Validación cruzada.** Repite entrenamiento/validación en particiones del
-conjunto de entrenamiento. Sirve para comparar configuraciones sin recurrir al
-test final. En cada fold se entrena con una parte y se mide en la parte restante.
-En Cauce se exigen cinco particiones estratificadas en las búsquedas.
+Multiplicar muchas probabilidades pequeñas puede producir underflow: la computadora redondea el resultado a cero. El clasificador sumará logaritmos:
 
-**GridSearchCV.** Prueba una grilla de configuraciones mediante validación
-cruzada. Sirve para seleccionar hiperparámetros de forma sistemática. Clona el
-pipeline por candidato/fold y resume la métrica elegida. En Cauce se exige
-`f1_macro`, y se debe concluir sobre cada hiperparámetro. La grilla concreta no
-está definida en el material y se justificará en S2.
+$$
+s_c(x)=\log P(c)+\sum_{t=1}^{V}x_t\log P(t\mid c),
+\qquad \hat c=\operatorname*{argmax}_c s_c(x).
+$$
 
-**Hiperparámetros.** Son decisiones fijadas antes de ajustar un modelo, distintas
-de los valores aprendidos. Sirven para controlar su comportamiento. Ejemplos:
-`alpha`, `ngram_range`, `min_df`, `n_neighbors` y `weights`. Son candidatos de
-estudio, no una grilla impuesta ni seleccionada. En Cauce los nombres de un
-pipeline permiten buscarlos como `nb__alpha` o `vec__min_df`.
+`x_t` es el conteo del término `t` en el mensaje; `s_c` es el puntaje de la clase; `ĉ` es la clase predicha; `argmax` elige la clase con mayor puntaje. El factor multinomial común a las clases no cambia esa elección y se cancela al normalizar.
 
-**Probabilidades fuera de muestra (OOF).** Son predicciones para cada ejemplo
-realizadas por un modelo que no lo usó al entrenar. Sirven para elegir reglas
-con una estimación más honesta que las probabilidades de entrenamiento. En
-Cauce se solicitan mediante `cross_val_predict` para escoger umbrales dentro
-del training. El conjunto de prueba sigue reservado.
+Para obtener probabilidades que sumen uno:
 
-**Fuga de información.** Ocurre cuando el aprendizaje o las decisiones usan
-información que no estaría disponible al predecir o que pertenece a evaluación.
-Produce resultados demasiado optimistas. Puede aparecer por features que revelan
-la etiqueta, por aprender vocabulario/IDF con toda la tabla, por duplicados entre
-conjuntos o por ajustar umbrales mirando el test. En Cauce se evita revisando
-columnas, deduplicando antes del split y encerrando lo aprendido en un pipeline.
+$$
+\log P(c\mid x)=s_c(x)-L(x),
+\qquad L(x)=m+\log\sum_j\exp(s_j(x)-m),
+\qquad m=\max_j s_j(x).
+$$
 
-## Métricas y decisión
+`j` recorre las clases y `m` es el puntaje máximo del mensaje. La resta del máximo estabiliza la suma de exponenciales, que calculará `log_suma_exp`. Finalmente, `P(c | x)` se obtiene aplicando la exponencial al logaritmo normalizado.
 
-Para una clase como `fraude`, **TP** son fraudes predichos correctamente, **FP**
-mensajes de otras clases predichos como fraude y **FN** fraudes predichos como
-otra clase. Las métricas de clasificación siguientes se calculan sobre clases
-predichas; los indicadores de derivación se calculan sobre destinos finales.
+Para interpretar el modelo, `terminos_mas_indicativos` comparará el logaritmo de la probabilidad de cada término en una clase con su promedio en las otras. Esto destaca palabras que diferencian equipos, no simplemente las palabras más frecuentes.
 
-| Concepto | Qué es y para qué sirve | Cómo funciona | Uso en Cauce |
-| --- | --- | --- | --- |
-| Exactitud (accuracy) | Proporción global de aciertos. Resume rendimiento general. | `aciertos / total`. Puede ocultar errores en clases menos frecuentes. | Línea base manual y comparación del clasificador; no confundir con exactitud sólo de automáticos. |
-| Precisión | Entre los predichos de una clase, qué proporción corresponde a esa clase. Mide falsas alarmas. | `TP / (TP + FP)`. | Interpretar el reporte por clase del paso 15. No hay una meta docente de precisión identificada. |
-| Recall | Entre los casos reales de una clase, qué proporción se detecta. Mide omisiones. | `TP / (TP + FN)`. | Examinar especialmente fraude, junto con el destino de revisión. |
-| F1 macro | Promedio no ponderado del F1 de las clases. Da el mismo peso a cada clase. | Cada F1 combina precisión y recall como `2PR/(P+R)`; luego se promedian. | Métrica de selección exigida en GridSearchCV y línea base. |
-| Matriz de confusión | Tabla de clases reales frente a predichas. Permite localizar tipos de error. | Filas reales, columnas predichas; diagonal correcta. Normalizar por fila divide por el total real de cada clase. | La línea base exige normalización por fila y un orden de clases declarado. |
-| Umbrales de confianza | Valores que convierten probabilidades en decisiones. Permiten graduar automatización y revisión. | Se compara `P(fraude)` con un umbral y luego el máximo con otro. | Fraude tiene prioridad con `>=`; después clase de máxima probabilidad con `>=`; en otro caso, revisión humana. Los valores siguen pendientes. |
+## Representación del texto y KNN
 
-**Indicadores de derivación.** Si `A` es el número de destinos automáticos y `N`
-el total, cobertura es `A/N`. Si `C` de esos destinos son correctos, exactitud
-automática es `C/A`. Si `L` fraudes reales fueron enviados automáticamente a
-otro equipo y existen `F` fraudes reales, fraude perdido es `L/F`. Los fraudes
-en revisión humana no cuentan como perdidos según el contrato docente.
-Los denominadores cero requieren una convención aún no especificada.
+**CountVectorizer.** Convierte mensajes en una matriz de conteos, con una columna por término del vocabulario. Si el vocabulario fuera `tarjeta`, `robaron`, el texto “robaron tarjeta tarjeta” produciría `[2, 1]`. En Cauce será la representación de entrada de Naive Bayes. Su salida dispersa guarda principalmente los valores distintos de cero.
 
-Ejemplo exclusivamente didáctico: de 100 mensajes, 70 automáticos y 63 correctos
-dan cobertura 0,70 y exactitud automática 0,90. Si hay diez fraudes y uno va
-automáticamente a un equipo incorrecto, fraude perdido es 0,10. Estos valores
-no son metas ni resultados de Cauce.
+**TF-IDF.** Combina frecuencia del término en un documento (TF) con una ponderación inversa según cuántos documentos lo contienen (IDF). Reduce el peso de palabras presentes en muchos mensajes y resalta las más específicas. Una forma suavizada de IDF, usada por defecto en scikit-learn, es:
 
-Al defender el proyecto habrá que distinguir lo medido de lo proyectado, una
-clase predicha de un destino final y una probabilidad estimada de una garantía.
-Los criterios de aceptación faltantes deben confirmarse; no se derivan de un
-ejemplo teórico ni de los valores usados por los tests.
+$$
+\operatorname{idf}(t)=\log\frac{1+N}{1+\operatorname{df}(t)}+1.
+$$
+
+`N` es el número de documentos de entrenamiento y `df(t)` la cantidad que contiene `t`. TF-IDF multiplica ese valor por la frecuencia del término y normalmente normaliza el vector. En Cauce representará los textos para KNN. El IDF se ajustará sólo en entrenamiento.
+
+**KNN.** Clasifica buscando los `k` ejemplos más cercanos y combinando sus etiquetas mediante votos, uniformes o ponderados. En Cauce buscará mensajes históricos parecidos con `KNeighborsClassifier`; `k` y las ponderaciones se elegirán por validación. La distancia coseno compara la orientación de los vectores:
+
+$$
+d_{\cos}(u,v)=1-\frac{u\cdot v}{\lVert u\rVert\lVert v\rVert}.
+$$
+
+`u` y `v` son vectores no nulos de dos mensajes; el punto indica producto escalar y las barras, su norma. Mensajes que comparten términos relevantes pueden ser cercanos aunque difieran en longitud. Con vectores normalizados, euclídea y coseno pueden ordenar igual a los vecinos; la consigna pide coseno y búsqueda `brute`. KNN conserva el entrenamiento y compara contra él al predecir, por lo que se evaluarán su tiempo y su costo de memoria.
+
+## Separación, validación y métricas
+
+**Entrenamiento y prueba.** Separamos datos para evaluar con ejemplos que el modelo no aprendió. La consigna fija 80% para entrenamiento y 20% para prueba, con estratificación por clase y semilla 42. Quitaremos duplicados antes de dividir para evitar que la misma copia aparezca en ambos conjuntos.
+
+**Validación cruzada.** Divide el entrenamiento en particiones: se ajusta con algunas y se valida con la restante, repitiendo el proceso. En Cauce serán cinco particiones estratificadas para ajustar parámetros con F1 macro. El pipeline vuelve a aprender vocabulario e IDF dentro de cada partición, sin usar información de su validación. Las probabilidades fuera de muestra permitirán elegir umbrales sin consultar prueba.
+
+**Matriz de confusión.** Cuenta las combinaciones de clase real y clase predicha. Usaremos filas reales y columnas predichas: la diagonal contiene los aciertos. Normalizar por fila permite ver qué porcentaje de cada equipo se confunde con los demás, especialmente cuánto fraude termina en tarjeta o transferencias.
+
+Para precision, recall y F1 miramos una clase contra el resto. `TP` son sus aciertos; `FP`, mensajes de otras clases asignados a ella; y `FN`, mensajes reales de esa clase asignados a otra.
+
+**Accuracy o exactitud.** Es la proporción total de predicciones correctas:
+
+$$
+\operatorname{accuracy}=\frac{\text{aciertos}}{\text{mensajes evaluados}}.
+$$
+
+Resume el desempeño general de Cauce, pero puede esconder errores en fraude porque hay menos ejemplos de esa clase.
+
+**Precision.** Entre los mensajes clasificados como una clase, indica qué proporción realmente le corresponde:
+
+$$
+\operatorname{precision}=\frac{TP}{TP+FP}.
+$$
+
+En fraude ayuda a medir cuántas alertas enviadas al equipo son correctas. Por ejemplo, 8 fraudes reales entre 10 alertas dan precision de 0,8.
+
+**Recall.** Entre los mensajes reales de una clase, mide qué proporción recuperó el clasificador:
+
+$$
+\operatorname{recall}=\frac{TP}{TP+FN}.
+$$
+
+Si detecta 8 de 12 fraudes reales, su recall es `8/12`. Sirve para estudiar cuánto fraude deja de reconocer el modelo.
+
+**F1-score.** Combina precision y recall con su media armónica:
+
+$$
+F1=\frac{2\,\operatorname{precision}\,\operatorname{recall}}
+{\operatorname{precision}+\operatorname{recall}}.
+$$
+
+Baja si una de las dos métricas es baja. F1 macro promedia el F1 de las cinco clases con igual peso, así que una clase numerosa no domina la comparación. Si un denominador es cero, habrá que fijar y comunicar la convención usada para calcular la métrica.
+
+## Umbrales y derivación
+
+**Umbrales de decisión.** Son límites que transforman las probabilidades en una acción. En Cauce primero se compara `P(fraude)` con `umbral_fraude`; después, si no se activa esa prioridad, se compara la probabilidad máxima con `umbral_confianza`. Si ninguna condición se cumple, el destino es revisión humana. Las comparaciones incluyen la igualdad (`>=`).
+
+Bajar el umbral de fraude puede recuperar más fraudes y enviar más casos de otros equipos a ese sector. Subir el de confianza suele reducir la cobertura automática y aumentar la revisión. Se elegirán con validación y criterios de aceptación, sin tomar los números de los tests como valores definitivos.
+
+La evaluación de la regla distingue:
+
+| Indicador | Cálculo y uso en Cauce |
+| --- | --- |
+| Cobertura | Automáticos / total. Mide cuántos mensajes dejan de requerir derivación humana. |
+| Exactitud automática | Automáticos correctos / automáticos. Mide la calidad de los destinos decididos sin revisión. |
+| Fraude perdido | Fraudes enviados automáticamente a otro equipo / fraudes reales. Mide los casos críticos que se desvían; revisión humana no cuenta como pérdida. |
+
+El recall del clasificador y el fraude perdido de la regla tienen definiciones distintas. Un mensaje enviado a revisión no queda reconocido automáticamente como fraude, pero tampoco se considera perdido según el contrato de `evaluar_derivacion`.

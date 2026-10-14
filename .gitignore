@@ -1,32 +1,10 @@
-# Entornos y cachés de Python/Jupyter
 .venv/
-venv/
-env/
 __pycache__/
 *.py[cod]
 .pytest_cache/
 .ipynb_checkpoints/
-.mypy_cache/
-.ruff_cache/
 
-# Configuración local, secretos y temporales
-.local/
-.env
-.env.*
-!.env.example
-.vscode/
-.idea/
-*.pem
-*.key
-*.log
-*.tmp
-*.swp
-~$*
-Thumbs.db
-.DS_Store
-
-# Datos originales: conservar en local; publicación suspendida por privacidad.
-/caso1_cauce/datos/mensajes_historicos.csv
-/caso1_cauce/datos/mensajes_nuevos.csv
-/caso1_cauce/predicciones_caso1.csv
-/predicciones_caso1.csv
+# Datos y salidas con mensajes o identificadores de clientes.
+caso1_cauce/datos/*.csv
+predicciones_caso1.csv
+caso1_cauce/predicciones_caso1.csv
